@@ -1,4 +1,4 @@
-GitFocus-Service Application
+GitFocus-Service_WCWR Application
 ============================
 
 Technologies Used:
@@ -10,7 +10,7 @@ Steps to Setup
 1. Clone the repository
 ------------------------
 
-==> https://github.com/dag-gitfocus/GitFocus_Service.git
+==> https://github.com/dag-gitfocus/GitFocus-Service_WCWR.git
 
 2. Configure PostgreSQL
 -----------------------
