@@ -1,0 +1,200 @@
+#
+# There is insufficient memory for the Java Runtime Environment to continue.
+# Native memory allocation (mmap) failed to map 134217728 bytes for Failed to commit area from 0x0000000081c00000 to 0x0000000089c00000 of length 134217728.
+# Possible reasons:
+#   The system is out of physical RAM or swap space
+#   The process is running with CompressedOops enabled, and the Java Heap may be blocking the growth of the native heap
+# Possible solutions:
+#   Reduce memory load on the system
+#   Increase physical memory or swap space
+#   Check if swap backing store is full
+#   Decrease Java heap size (-Xmx/-Xms)
+#   Decrease number of Java threads
+#   Decrease Java thread stack sizes (-Xss)
+#   Set larger code cache with -XX:ReservedCodeCacheSize=
+# This output file may be truncated or incomplete.
+#
+#  Out of Memory Error (t:/workspace/src/hotspot/os/windows/os_windows.cpp:3221), pid=1472, tid=69072
+#
+# JRE version:  (10.0+44) (build )
+# Java VM: OpenJDK 64-Bit Server VM (10+44, mixed mode, aot, tiered, compressed oops, g1 gc, windows-amd64)
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=53700 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dspring.jmx.enabled=true -Dspring.application.admin.enabled=true -Xverify:none -XX:TieredStopAtLevel=1 -Dspring.boot.project.name=GitFocus-Service_WCWR -Dfile.encoding=UTF-8 com.gitfocus.GitFocusApplication --spring.output.ansi.enabled=always
+
+Host: Intel(R) Core(TM) i5-4200U CPU @ 1.60GHz, 4 cores, 7G,  Windows 10 , 64 bit Build 18362 (10.0.18362.900)
+Time: Wed Jul 22 19:46:27 2020 India Standard Time elapsed time: 27 seconds (0d 0h 0m 27s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x000001b43593c800):  JavaThread "Unknown thread" [_thread_in_vm, id=69072, stack(0x0000009347b00000,0x0000009347c00000)]
+
+Stack: [0x0000009347b00000,0x0000009347c00000]
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [jvm.dll+0x551579]
+V  [jvm.dll+0x66b1a1]
+V  [jvm.dll+0x66c396]
+V  [jvm.dll+0x66ca23]
+V  [jvm.dll+0x230148]
+V  [jvm.dll+0x54ee94]
+V  [jvm.dll+0x545e65]
+V  [jvm.dll+0x2e7d0b]
+V  [jvm.dll+0x2e7c75]
+V  [jvm.dll+0x2e7b52]
+V  [jvm.dll+0x2e9af6]
+V  [jvm.dll+0x32fdf3]
+V  [jvm.dll+0x330506]
+V  [jvm.dll+0x32fef3]
+V  [jvm.dll+0x2b5e78]
+V  [jvm.dll+0x2b6f91]
+V  [jvm.dll+0x64b52b]
+V  [jvm.dll+0x64cd4c]
+V  [jvm.dll+0x33d389]
+V  [jvm.dll+0x633702]
+V  [jvm.dll+0x375053]
+V  [jvm.dll+0x376fb1]
+C  [javaw.exe+0x3541]
+C  [javaw.exe+0xdd7f]
+C  [javaw.exe+0xdf26]
+C  [KERNEL32.DLL+0x17bd4]
+C  [ntdll.dll+0x6ce51]
+
+
+---------------  P R O C E S S  ---------------
+
+Threads class SMR info:
+_java_thread_list=0x000001b4330fa600, length=0, elements={
+}
+
+Java Threads: ( => current thread )
+
+Other Threads:
+  0x000001b435955000 GCTaskThread "GC Thread#0" [stack: 0x0000009347c00000,0x0000009347d00000] [id=100456]
+  0x000001b435956800 GCTaskThread "GC Thread#1" [stack: 0x0000009347d00000,0x0000009347e00000] [id=100416]
+  0x000001b435959000 GCTaskThread "GC Thread#2" [stack: 0x0000009347e00000,0x0000009347f00000] [id=100388]
+  0x000001b43595c000 GCTaskThread "GC Thread#3" [stack: 0x0000009347f00000,0x0000009348000000] [id=98428]
+  0x000001b43596e800 ConcurrentGCThread "G1 Main Marker" [stack: 0x0000009348000000,0x0000009348100000] [id=95348]
+  0x000001b44dd37000 ConcurrentGCThread "G1 Conc#0" [stack: 0x0000009348100000,0x0000009348200000] [id=100504]
+
+[error occurred during error reporting (printing all threads), id 0xe0000002]
+
+VM state:not at safepoint (not fully initialized)
+
+VM Mutex/Monitor currently owned by a thread:  ([mutex/lock_event])
+[0x000001b43593b760] Heap_lock - owner thread: 0x000001b43593c800
+
+Heap address: 0x0000000081c00000, size: 2020 MB, Compressed Oops mode: Non-zero based: 0x0000000081c00000
+Narrow klass base: 0x0000000000000000, Narrow klass shift: 0
+
+GC Heap History (0 events):
+No events
+
+Deoptimization events (0 events):
+No events
+
+Classes redefined (0 events):
+No events
+
+Internal exceptions (0 events):
+No events
+
+Events (0 events):
+No events
+
+
+Dynamic libraries:
+0x00007ff699d90000 - 0x00007ff699dcd000 	C:\Program Files\Java\jdk-10\bin\javaw.exe
+0x00007ffcf3de0000 - 0x00007ffcf3fd0000 	C:\WINDOWS\SYSTEM32\ntdll.dll
+0x00007ffcf22a0000 - 0x00007ffcf2352000 	C:\WINDOWS\System32\KERNEL32.DLL
+0x00007ffcf1050000 - 0x00007ffcf12f4000 	C:\WINDOWS\System32\KERNELBASE.dll
+0x00007ffcf3240000 - 0x00007ffcf33d4000 	C:\WINDOWS\System32\USER32.dll
+0x00007ffcf1320000 - 0x00007ffcf1341000 	C:\WINDOWS\System32\win32u.dll
+0x00007ffcf2360000 - 0x00007ffcf2386000 	C:\WINDOWS\System32\GDI32.dll
+0x00007ffcf1450000 - 0x00007ffcf15e5000 	C:\WINDOWS\System32\gdi32full.dll
+0x00007ffcf15f0000 - 0x00007ffcf168e000 	C:\WINDOWS\System32\msvcp_win.dll
+0x00007ffcf1350000 - 0x00007ffcf144a000 	C:\WINDOWS\System32\ucrtbase.dll
+0x00007ffcef910000 - 0x00007ffcefb94000 	C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.18362.900_none_e6beb9d913147d17\COMCTL32.dll
+0x00007ffcf3640000 - 0x00007ffcf36de000 	C:\WINDOWS\System32\msvcrt.dll
+0x00007ffcf2480000 - 0x00007ffcf27b5000 	C:\WINDOWS\System32\combase.dll
+0x00007ffcf27c0000 - 0x00007ffcf28e0000 	C:\WINDOWS\System32\RPCRT4.dll
+0x00007ffcf1690000 - 0x00007ffcf1710000 	C:\WINDOWS\System32\bcryptPrimitives.dll
+0x00007ffcf3d70000 - 0x00007ffcf3d9e000 	C:\WINDOWS\System32\IMM32.DLL
+0x0000000068000000 - 0x0000000068066000 	C:\WINDOWS\System32\QIPCAP64.dll
+0x00007ffcf21f0000 - 0x00007ffcf2293000 	C:\WINDOWS\System32\ADVAPI32.dll
+0x00007ffcf2040000 - 0x00007ffcf20d7000 	C:\WINDOWS\System32\sechost.dll
+0x00007ffcf2b50000 - 0x00007ffcf3236000 	C:\WINDOWS\System32\SHELL32.dll
+0x00007ffcf0e80000 - 0x00007ffcf0eca000 	C:\WINDOWS\System32\cfgmgr32.dll
+0x00007ffcf28e0000 - 0x00007ffcf2989000 	C:\WINDOWS\System32\shcore.dll
+0x00007ffcf1710000 - 0x00007ffcf1e90000 	C:\WINDOWS\System32\windows.storage.dll
+0x00007ffcf0d40000 - 0x00007ffcf0d63000 	C:\WINDOWS\System32\profapi.dll
+0x00007ffcf0cf0000 - 0x00007ffcf0d3a000 	C:\WINDOWS\System32\powrprof.dll
+0x00007ffcf0ca0000 - 0x00007ffcf0cb0000 	C:\WINDOWS\System32\UMPDC.dll
+0x00007ffcf35d0000 - 0x00007ffcf3622000 	C:\WINDOWS\System32\shlwapi.dll
+0x00007ffcf0cb0000 - 0x00007ffcf0cc1000 	C:\WINDOWS\System32\kernel.appcore.dll
+0x00007ffcf1300000 - 0x00007ffcf1317000 	C:\WINDOWS\System32\cryptsp.dll
+0x00007ffcf0260000 - 0x00007ffcf032b000 	C:\WINDOWS\SYSTEM32\DNSAPI.dll
+0x00007ffcf2180000 - 0x00007ffcf21ef000 	C:\WINDOWS\System32\WS2_32.dll
+0x00007ffcf23a0000 - 0x00007ffcf23a8000 	C:\WINDOWS\System32\NSI.dll
+0x00007ffcf0220000 - 0x00007ffcf025a000 	C:\WINDOWS\SYSTEM32\IPHLPAPI.DLL
+0x00007ffcc9f10000 - 0x00007ffcc9fc2000 	C:\Program Files\McAfee\Endpoint Security\Threat Prevention\Ips\EpMPApi.dll
+0x00007ffcf0e20000 - 0x00007ffcf0e7c000 	C:\WINDOWS\System32\WINTRUST.dll
+0x00007ffcf0cd0000 - 0x00007ffcf0ce2000 	C:\WINDOWS\System32\MSASN1.dll
+0x000001b434be0000 - 0x000001b434d29000 	C:\WINDOWS\System32\CRYPT32.dll
+0x0000000061d20000 - 0x0000000061d2c000 	C:\Program Files\McAfee\Endpoint Security\Threat Prevention\Ips\EpMPThe.dll
+0x0000000061fa0000 - 0x0000000061fd6000 	C:\Program Files\Common Files\McAfee\SystemCore\mfehcinj.dll
+0x0000000061f90000 - 0x0000000061f9e000 	C:\Program Files\Common Files\McAfee\SystemCore\mfehcthe.dll
+0x00007ffcd2170000 - 0x00007ffcd219d000 	C:\Program Files\McAfee\Endpoint Security\Adaptive Threat Protection\mfedeeprem64.dll
+0x000001b434f10000 - 0x000001b435067000 	C:\WINDOWS\System32\ole32.dll
+0x00007ffcf23b0000 - 0x00007ffcf2475000 	C:\WINDOWS\System32\OLEAUT32.dll
+0x00007ffcac430000 - 0x00007ffcac51f000 	C:\Program Files\Java\jdk-10\bin\msvcr120.dll
+0x00007ffcb1270000 - 0x00007ffcb1316000 	C:\Program Files\Java\jdk-10\bin\msvcp120.dll
+0x0000000061330000 - 0x0000000061d1d000 	C:\Program Files\Java\jdk-10\bin\server\jvm.dll
+0x00007ffcf2390000 - 0x00007ffcf2398000 	C:\WINDOWS\System32\PSAPI.DLL
+0x00007ffcd6e80000 - 0x00007ffcd6e89000 	C:\WINDOWS\SYSTEM32\WSOCK32.dll
+0x00007ffce36b0000 - 0x00007ffce36ba000 	C:\WINDOWS\SYSTEM32\VERSION.dll
+0x00007ffcebdf0000 - 0x00007ffcebe14000 	C:\WINDOWS\SYSTEM32\WINMM.dll
+0x00007ffcebdc0000 - 0x00007ffcebded000 	C:\WINDOWS\SYSTEM32\winmmbase.dll
+0x00007ffcd2050000 - 0x00007ffcd205f000 	C:\Program Files\Java\jdk-10\bin\verify.dll
+0x00007ffcdb650000 - 0x00007ffcdb844000 	C:\WINDOWS\SYSTEM32\DBGHELP.DLL
+0x00007ffcd91d0000 - 0x00007ffcd91fa000 	C:\WINDOWS\SYSTEM32\dbgcore.DLL
+0x00007ffcc87b0000 - 0x00007ffcc87d7000 	C:\Program Files\Java\jdk-10\bin\java.dll
+0x00007ffcc8d00000 - 0x00007ffcc8d16000 	C:\Program Files\Java\jdk-10\bin\zip.dll
+0x00007ffccf900000 - 0x00007ffccf90a000 	C:\Program Files\Java\jdk-10\bin\jimage.dll
+
+dbghelp: loaded successfully - version: 4.0.5 - missing functions: none
+symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Program Files\Java\jdk-10\bin;C:\WINDOWS\SYSTEM32;C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.18362.900_none_e6beb9d913147d17;C:\Program Files\McAfee\Endpoint Security\Threat Prevention\Ips;C:\Program Files\Common Files\McAfee\SystemCore;C:\Program Files\McAfee\Endpoint Security\Adaptive Threat Protection;C:\Program Files\Java\jdk-10\bin\server
+
+VM Arguments:
+jvm_args: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=53700 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost -Dspring.jmx.enabled=true -Dspring.application.admin.enabled=true -Xverify:none -XX:TieredStopAtLevel=1 -Dspring.boot.project.name=GitFocus-Service_WCWR -Dfile.encoding=UTF-8 
+java_command: com.gitfocus.GitFocusApplication --spring.output.ansi.enabled=always
+java_class_path (initial): C:\Users\SP00553980\git\GitFocus-Service_WCWR\target\classes;C:\Users\SP00553980\.m2\repository\org\springframework\boot\spring-boot-starter-data-jpa\2.2.6.RELEASE\spring-boot-starter-data-jpa-2.2.6.RELEASE.jar;C:\Users\SP00553980\.m2\repository\org\springframework\boot\spring-boot-starter-aop\2.2.6.RELEASE\spring-boot-starter-aop-2.2.6.RELEASE.jar;C:\Users\SP00553980\.m2\repository\org\aspectj\aspectjweaver\1.9.5\aspectjweaver-1.9.5.jar;C:\Users\SP00553980\.m2\repository\org\springframework\boot\spring-boot-starter-jdbc\2.2.6.RELEASE\spring-boot-starter-jdbc-2.2.6.RELEASE.jar;C:\Users\SP00553980\.m2\repository\com\zaxxer\HikariCP\3.4.2\HikariCP-3.4.2.jar;C:\Users\SP00553980\.m2\repository\org\springframework\spring-jdbc\5.2.5.RELEASE\spring-jdbc-5.2.5.RELEASE.jar;C:\Users\SP00553980\.m2\repository\jakarta\activation\jakarta.activation-api\1.2.2\jakarta.activation-api-1.2.2.jar;C:\Users\SP00553980\.m2\repository\jakarta\persistence\jakarta.persistence-api\2.2.3\jakarta.persistence-api-2.2.3.jar;C:\Users\SP00553980\.m2\repository\jakarta\transaction\jakarta.transaction-api\1.3.3\jakarta.transaction-api-1.3.3.jar;C:\Users\SP00553980\.m2\repository\org\hibernate\hibernate-core\5.4.12.Final\hibernate-core-5.4.12.Final.jar;C:\Users\SP00553980\.m2\repository\org\javassist\javassist\3.24.0-GA\javassist-3.24.0-GA.jar;C:\Users\SP00553980\.m2\repository\net\bytebuddy\byte-buddy\1.10.8\byte-buddy-1.10.8.jar;C:\Users\SP00553980\.m2\repository\antlr\antlr\2.7.7\antlr-2.7.7.jar;C:\Users\SP00553980\.m2\repository\org\jboss\jandex\2.1.1.Final\jandex-2.1.1.Final.jar;C:\Users\SP00553980\.m2\repository\com\fasterxml\classmate\1.5.1\classmate-1.5.1.jar;C:\Users\SP00553980\.m2\repository\org\dom4j\dom4j\2.1.1\dom4j-2.1.1.jar;C:\Users\SP00553980\.m2\repository\org\hibernate\common\hibernate-commons-annotations\5.1.0.Final\hibernate-commons-annotations-5.1.0.Final.jar;C:\Users\SP00553980\.m2\repository\org\glassfish\jaxb\jaxb-runtime\2.3.2\jaxb-runtime-2.3.2.j
+Launcher Type: SUN_STANDARD
+
+Logging:
+Log output configuration:
+#0: stdout all=warning uptime,level,tags
+#1: stderr all=off uptime,level,tags
+
+Environment Variables:
+JAVA_HOME=C:\Program Files\Java\jdk-10
+PATH=C:/Program Files/Java/jdk-10/bin/server;C:/Program Files/Java/jdk-10/bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Windows\CCM;C:\Windows\CCM;C:\Program Files\nodejs\;C:\Program Files\Java\jdk-10\bin;C:\Program Files (x86)\Webex\Webex\Applications;C:\Users\SP00553980\AppData\Local\Microsoft\WindowsApps;C:\Users\SP00553980\AppData\Roaming\npm;C:\Users\SP00553980\AppData\Local\Programs\Git\cmd;C:\Users\SP00553980\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\SP00553980\AppData\Local\GitHubDesktop\bin;D:\STS\sts-4.6.1.RELEASE;
+USERNAME=SP00553980
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 69 Stepping 1, GenuineIntel
+
+
+
+---------------  S Y S T E M  ---------------
+
+OS: Windows 10 , 64 bit Build 18362 (10.0.18362.900)
+
+CPU:total 4 (initial active 4) (2 cores per cpu, 2 threads per core) family 6 model 69 stepping 1, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, avx, avx2, aes, clmul, erms, lzcnt, ht, tsc, tscinvbit, bmi1, bmi2, fma
+
+Memory: 4k page, physical 8266836k(980808k free), swap 32660432k(149712k free)
+
+vm_info: OpenJDK 64-Bit Server VM (10+44) for windows-amd64 JRE (10+44), built on Feb 16 2018 20:30:25 by "mach5one" with MS VC++ 12.0 (VS2013)
+
+END.

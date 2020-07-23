@@ -1,0 +1,7 @@
+{
+  "auth-server-url": "http://localhost:8080/auth",
+  "realm": "DAG_WCWR",
+  "resource": "GitFocus_WCWR",
+  "ssl-required": "external",
+  "enable-cors" :true  
+}
