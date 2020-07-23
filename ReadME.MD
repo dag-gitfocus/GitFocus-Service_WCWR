@@ -6,7 +6,7 @@ Technologies Used:
 Spring Boot, PostgreSQL, JPA, Hibernate, Angular8 and Log4j2
 
 Steps to Setup
-==============
+============== 
 1. Clone the repository
 ------------------------
 
