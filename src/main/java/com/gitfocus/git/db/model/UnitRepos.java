@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Model class for unit_repos table in DB
  */
 @Entity
-@Table(name = "unit_repos", schema = "gitfocus")
+@Table(name = "unit_repos", schema = "wcwr_dev")
 public class UnitRepos implements Serializable {
  
     /**

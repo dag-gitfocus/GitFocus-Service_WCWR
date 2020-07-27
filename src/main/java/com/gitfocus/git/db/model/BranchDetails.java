@@ -19,88 +19,87 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "branch_details", schema = "wcwr_dev")
 public class BranchDetails implements Serializable {
- 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
 
-    public BranchDetails() {
-        super();
-    }
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
-    @JsonIgnore
-    @JoinColumns({ @JoinColumn(name = "unit_id", referencedColumnName = "unit_id"),
-        @JoinColumn(name = "repo_id", referencedColumnName = "repo_id"),
-        @JoinColumn(name = "branch_name", referencedColumnName = "branch_name")})
+	public BranchDetails() {
+		super();
+	}
 
-    @EmbeddedId
-    BranchDetailsCompositeId bCompositeId;
+	@JsonIgnore
+	@JoinColumns({ @JoinColumn(name = "unit_id", referencedColumnName = "unit_id"),
+		@JoinColumn(name = "repo_id", referencedColumnName = "repo_id")})
 
-    @Column(name = "parent_branch")
-    private String parentBranch;
+	@EmbeddedId
+	BranchDetailsCompositeId bCompositeId;
 
-    /**
-     * 
-     * @return bCompositeId
-     */
-    public BranchDetailsCompositeId getbCompositeId() {
-        return bCompositeId;
-    }
+	@Column(name = "parent_branch")
+	private String parentBranch;
 
-    /**
-     * 
-     * @param bCompositeId
-     */
-    public void setbCompositeId(BranchDetailsCompositeId bCompositeId) {
-        this.bCompositeId = bCompositeId;
-    }
+	/**
+	 * 
+	 * @return bCompositeId
+	 */
+	public BranchDetailsCompositeId getbCompositeId() {
+		return bCompositeId;
+	}
 
-    /**
-     * 
-     * @return parentBranch
-     */
-    public String getParentBranch() {
-        return parentBranch;
-    }
+	/**
+	 * 
+	 * @param bCompositeId
+	 */
+	public void setbCompositeId(BranchDetailsCompositeId bCompositeId) {
+		this.bCompositeId = bCompositeId;
+	}
 
-    /**
-     * 
-     * @param parentBranch
-     */
-    public void setParentBranch(String parentBranch) {
-        this.parentBranch = parentBranch;
-    }
+	/**
+	 * 
+	 * @return parentBranch
+	 */
+	public String getParentBranch() {
+		return parentBranch;
+	}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((bCompositeId == null) ? 0 : bCompositeId.hashCode());
-        result = prime * result + ((parentBranch == null) ? 0 : parentBranch.hashCode());
-        return result;
-    }
+	/**
+	 * 
+	 * @param parentBranch
+	 */
+	public void setParentBranch(String parentBranch) {
+		this.parentBranch = parentBranch;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        BranchDetails other = (BranchDetails) obj;
-        if (bCompositeId == null) {
-            if (other.bCompositeId != null)
-                return false;
-        } else if (!bCompositeId.equals(other.bCompositeId))
-            return false;
-        if (parentBranch == null) {
-            if (other.parentBranch != null)
-                return false;
-        } else if (!parentBranch.equals(other.parentBranch))
-            return false;
-        return true;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((bCompositeId == null) ? 0 : bCompositeId.hashCode());
+		result = prime * result + ((parentBranch == null) ? 0 : parentBranch.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BranchDetails other = (BranchDetails) obj;
+		if (bCompositeId == null) {
+			if (other.bCompositeId != null)
+				return false;
+		} else if (!bCompositeId.equals(other.bCompositeId))
+			return false;
+		if (parentBranch == null) {
+			if (other.parentBranch != null)
+				return false;
+		} else if (!parentBranch.equals(other.parentBranch))
+			return false;
+		return true;
+	}
 
 }

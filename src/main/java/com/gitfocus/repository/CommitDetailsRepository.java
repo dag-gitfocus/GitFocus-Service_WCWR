@@ -35,9 +35,9 @@ public interface CommitDetailsRepository extends JpaRepository<CommitDetails, Ob
 	 * @param endDate
 	 * @return getCommitDetailsForMemberForTwoWeek Results
 	 */
-	@Query(value = "SELECT ur.repo_name ,cd.user_id,d,count(cd.commit_date) from gitfocus.commit_details\r\n"
-			+ "cd join gitfocus.branch_details bd ON (cd.repo_id=bd.repo_id and cd.branch_name=bd.branch_name)\r\n"
-			+ "join gitfocus.unit_repos ur on (ur.repo_id=bd.repo_id) RIGHT JOIN generate_series( \r\n"
+	@Query(value = "SELECT ur.repo_name ,cd.user_id,d,count(cd.commit_date) from wcwr_dev.commit_details\r\n"
+			+ "cd join wcwr_dev.branch_details bd ON (cd.repo_id=bd.repo_id and cd.branch_name=bd.branch_name)\r\n"
+			+ "join wcwr_dev.unit_repos ur on (ur.repo_id=bd.repo_id) RIGHT JOIN generate_series( \r\n"
 			+ "date_trunc('day', (cast(?3 as timestamp) - interval '13 days' )), \r\n"
 			+ "date_trunc('day', cast(?3 as timestamp)),'1 day' \r\n"
 			+ ") AS gs(d) ON d = date_trunc('day',cd.commit_date) and \r\n"
@@ -51,9 +51,9 @@ public interface CommitDetailsRepository extends JpaRepository<CommitDetails, Ob
 	 * @param endDate
 	 * @return getCommitDetailsForMemberForOneWeek Results
 	 */
-	@Query(value = "SELECT ur.repo_name ,cd.user_id,d,count(cd.commit_date) from gitfocus.commit_details\r\n"
-			+ "cd join gitfocus.branch_details bd ON (cd.repo_id=bd.repo_id and cd.branch_name=bd.branch_name)\r\n"
-			+ "join gitfocus.unit_repos ur on (ur.repo_id=bd.repo_id) RIGHT JOIN generate_series( \r\n"
+	@Query(value = "SELECT ur.repo_name ,cd.user_id,d,count(cd.commit_date) from wcwr_dev.commit_details\r\n"
+			+ "cd join wcwr_dev.branch_details bd ON (cd.repo_id=bd.repo_id and cd.branch_name=bd.branch_name)\r\n"
+			+ "join wcwr_dev.unit_repos ur on (ur.repo_id=bd.repo_id) RIGHT JOIN generate_series( \r\n"
 			+ "date_trunc('day', (cast(?3 as timestamp) - interval '6 days' )), \r\n"
 			+ "date_trunc('day', cast(?3 as timestamp)),'1 day' \r\n"
 			+ ") AS gs(d) ON d = date_trunc('day',cd.commit_date) and \r\n"

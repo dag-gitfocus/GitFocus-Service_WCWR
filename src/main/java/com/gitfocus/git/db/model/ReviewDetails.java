@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author Tech Mahindra Model class for review_details table in DB
  */
 @Entity
-@Table(name = "review_details", schema = "gitfocus")
+@Table(name = "review_details", schema = "wcwr_dev")
 public class ReviewDetails implements Serializable {
  
     /**

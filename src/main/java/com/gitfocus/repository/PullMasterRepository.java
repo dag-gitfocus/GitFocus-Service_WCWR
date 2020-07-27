@@ -31,9 +31,9 @@ public interface PullMasterRepository extends JpaRepository<PullMaster, Object> 
 	 * @return getPullDetailsForMemberForTwoWeeks Results
 	 */
 	@Query(value = "    SELECT  ur.repo_name,pm.user_id,d,count(pm.created_time)  \r\n"
-			+ "			From gitfocus.pull_master pm join gitfocus.branch_details bd  \r\n"
+			+ "			From wcwr_dev.pull_master pm join wcwr_dev.branch_details bd  \r\n"
 			+ "			ON (pm.repo_id=bd.repo_id and pm.to_branch=bd.branch_name)  \r\n"
-			+ "			join gitfocus.unit_repos ur on (ur.repo_id=bd.repo_id) \r\n"
+			+ "			join wcwr_dev.unit_repos ur on (ur.repo_id=bd.repo_id) \r\n"
 			+ "			RIGHT JOIN generate_series( \r\n"
 			+ "			date_trunc('day', (cast(?3 as timestamp) - interval '13 days' )), \r\n"
 			+ "			date_trunc('day', cast(?3 as timestamp)),  			'1 day' \r\n"
@@ -50,9 +50,9 @@ public interface PullMasterRepository extends JpaRepository<PullMaster, Object> 
 	 * @return getPullDetailsForMemberForOneWeek Results
 	 */
 	@Query(value = "SELECT  ur.repo_name,pm.user_id,d,count(pm.created_time)  \r\n"
-			+ "    					From gitfocus.pull_master pm join gitfocus.branch_details bd  \r\n"
+			+ "    					From wcwr_dev.pull_master pm join wcwr_dev.branch_details bd  \r\n"
 			+ "    					ON (pm.repo_id=bd.repo_id and pm.to_branch=bd.branch_name)  \r\n"
-			+ "    					join gitfocus.unit_repos ur on (ur.repo_id=bd.repo_id) \r\n"
+			+ "    					join wcwr_dev.unit_repos ur on (ur.repo_id=bd.repo_id) \r\n"
 			+ "    					RIGHT JOIN generate_series( \r\n"
 			+ "    					date_trunc('day', (cast(?3 as timestamp) - interval '6 days' )), \r\n"
 			+ "    					date_trunc('day', cast(?3 as timestamp)),  			'1 day' \r\n"

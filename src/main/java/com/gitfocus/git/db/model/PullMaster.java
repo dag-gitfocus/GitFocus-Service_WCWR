@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Model class for pull_master table in DB
  */
 @Entity
-@Table(name = "pull_master", schema = "gitfocus")
+@Table(name = "pull_master", schema = "wcwr_dev")
 public class PullMaster implements Serializable {
  
     private static final long serialVersionUID = 1L;

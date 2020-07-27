@@ -24,8 +24,8 @@ public interface PullCommitRepository extends JpaRepository<PullCommit, Object> 
 	 */
 	@Query(value = "select * from (select cm.user_id,cm.commit_date,cm.message,cm.file_status,cm.lines_added,cm.lines_removed,cm.file_name,cm.branch_name,\r\n" + 
 			"			ROW_NUMBER () OVER (ORDER BY commit_date)\r\n" + 
-			"			from gitfocus.commit_details cm\r\n" + 
-			"			JOIN gitfocus.pull_commit pc ON cm.sha_id = pc.commit_id\r\n" + 
+			"			from wcwr_dev.commit_details cm\r\n" + 
+			"			JOIN wcwr_dev.pull_commit pc ON cm.sha_id = pc.commit_id\r\n" + 
 			"			AND cm.branch_name = pc.branch_name\r\n" + 
 			"			AND cm.repo_id = pc.repo_id\r\n" + 
 			"			where pc.pull_number= ?1\r\n" + 

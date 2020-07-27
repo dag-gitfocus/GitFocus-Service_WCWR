@@ -3,5 +3,8 @@
   "realm": "DAG_WCWR",
   "resource": "GitFocus_WCWR",
   "ssl-required": "external",
-  "enable-cors" :true  
+  "enable-cors" :true,
+  "credentials": {
+    "secret": "secret"
+  }  
 }

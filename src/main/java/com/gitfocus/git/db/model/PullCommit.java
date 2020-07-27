@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Model class for pull_commit table in DB
  */
 @Entity
-@Table(name = "pull_commit", schema = "gitfocus")
+@Table(name = "pull_commit", schema = "wcwr_dev")
 public class PullCommit implements Serializable {
  
     /**

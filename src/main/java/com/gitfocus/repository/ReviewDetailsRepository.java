@@ -23,7 +23,7 @@ public interface ReviewDetailsRepository extends JpaRepository<ReviewDetails, Ob
 	 * @param endDate
 	 * @return getCommitDetailsForMemberForOneWeek Results
 	 */
-	@Query(value = "SELECT ur.repo_name,rd.reviewed_by,d,count(rd.reviewed_at) from gitfocus.review_details rd join gitfocus.unit_repos ur on (ur.repo_id=rd.repo_id) RIGHT JOIN generate_series(date_trunc('day', (cast(?3 as timestamp) - interval '6 days' )),date_trunc('day', cast(?3 as timestamp)),'1 day') AS gs(d) ON d = date_trunc('day',rd.reviewed_at) and ur.repo_name=?1 and rd.reviewed_by=?2 group by ur.repo_name,rd.reviewed_by, d order by d", nativeQuery = true)
+	@Query(value = "SELECT ur.repo_name,rd.reviewed_by,d,count(rd.reviewed_at) from wcwr_dev.review_details rd join wcwr_dev.unit_repos ur on (ur.repo_id=rd.repo_id) RIGHT JOIN generate_series(date_trunc('day', (cast(?3 as timestamp) - interval '6 days' )),date_trunc('day', cast(?3 as timestamp)),'1 day') AS gs(d) ON d = date_trunc('day',rd.reviewed_at) and ur.repo_name=?1 and rd.reviewed_by=?2 group by ur.repo_name,rd.reviewed_by, d order by d", nativeQuery = true)
 	List<Object[]> getCommitDetailsForMemberForOneWeek(String repoName, String userId, String endDate);
 
 	/**
@@ -33,7 +33,7 @@ public interface ReviewDetailsRepository extends JpaRepository<ReviewDetails, Ob
 	 * @param endDate
 	 * @return getCommitDetailsForMemberForTwoWeek Results
 	 */
-	@Query(value = "SELECT ur.repo_name,rd.reviewed_by,d,count(rd.reviewed_at) from gitfocus.review_details rd join gitfocus.unit_repos ur on (ur.repo_id=rd.repo_id) RIGHT JOIN generate_series(date_trunc('day', (cast(?3 as timestamp) - interval '13 days' )),date_trunc('day', cast(?3 as timestamp)),'1 day') AS gs(d) ON d = date_trunc('day',rd.reviewed_at) and ur.repo_name=?1 and rd.reviewed_by=?2 group by ur.repo_name,rd.reviewed_by, d order by d", nativeQuery = true)
+	@Query(value = "SELECT ur.repo_name,rd.reviewed_by,d,count(rd.reviewed_at) from wcwr_dev.review_details rd join wcwr_dev.unit_repos ur on (ur.repo_id=rd.repo_id) RIGHT JOIN generate_series(date_trunc('day', (cast(?3 as timestamp) - interval '13 days' )),date_trunc('day', cast(?3 as timestamp)),'1 day') AS gs(d) ON d = date_trunc('day',rd.reviewed_at) and ur.repo_name=?1 and rd.reviewed_by=?2 group by ur.repo_name,rd.reviewed_by, d order by d", nativeQuery = true)
 	List<Object[]> getCommitDetailsForMemberForTwoWeek(String repoName, String userId, String endDate);
 
 	/**

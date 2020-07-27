@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Model class for teams table in DB
  */
 @Entity
-@Table(name = "teams", schema = "gitfocus")
+@Table(name = "teams", schema = "wcwr_dev")
 public class Teams implements Serializable {
  
     /**
