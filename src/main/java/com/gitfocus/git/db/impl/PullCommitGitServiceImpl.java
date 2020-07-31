@@ -94,7 +94,7 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 					pullNos.forEach(pullNo -> {
 						for (int page = 0; page <= gitConstant.MAX_PAGE; page++) {
 							pullCommitURI = gitConstant.BASE_URI + unitOwner + "/" + repoName
-									+ "/pulls/"+pullNo+"/commits?"+"state=all"+"&" + "page=" + page  + "&per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE+ "&";
+									+ "/pulls/"+pullNo+"/commits?"+"state=all"+"&" +  "until=" + java.time.LocalDateTime.now() + "page=" + page  + "&per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE+ "&";
 							pNUmber = Integer.parseInt(pullNo);
 
 							// sometimes pull number might be 0

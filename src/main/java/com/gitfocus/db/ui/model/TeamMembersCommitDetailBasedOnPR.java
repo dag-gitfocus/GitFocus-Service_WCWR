@@ -23,14 +23,14 @@ public class TeamMembersCommitDetailBasedOnPR implements Serializable {
 	private String[] fileStatusArray;
 	private String[] linesAddedArray;
 	private String[] linesRemovedArray;
-	private int totalFileCount;
+	private String[] totalFileCount;
 	private String totalFilesAdded;
 	private String totalFilesModified;
 	private String totalLinesAdded;
 	private String totalLinesRemoved;
 	private String branchName;
 	private String commitMessage;
-	
+
 
 	/**
 	 * 
@@ -122,13 +122,13 @@ public class TeamMembersCommitDetailBasedOnPR implements Serializable {
 	/**
 	 * @return
 	 */
-	public int getTotalFileCount() {
+	public String[] getTotalFileCount() {
 		return totalFileCount;
 	}
 	/**
 	 * @param totalFileCount
 	 */
-	public void setTotalFileCount(int totalFileCount) {
+	public void setTotalFileCount(String[] totalFileCount) {
 		this.totalFileCount = totalFileCount;
 	}
 	/**
@@ -203,8 +203,6 @@ public class TeamMembersCommitDetailBasedOnPR implements Serializable {
 	public void setCommitMessage(String commitMessage) {
 		this.commitMessage = commitMessage;
 	}
-	
-	
 
 	@Override
 	public int hashCode() {
@@ -217,7 +215,7 @@ public class TeamMembersCommitDetailBasedOnPR implements Serializable {
 		result = prime * result + Arrays.hashCode(fileStatusArray);
 		result = prime * result + Arrays.hashCode(linesAddedArray);
 		result = prime * result + Arrays.hashCode(linesRemovedArray);
-		result = prime * result + totalFileCount;
+		result = prime * result + Arrays.hashCode(totalFileCount);
 		result = prime * result + ((totalFilesAdded == null) ? 0 : totalFilesAdded.hashCode());
 		result = prime * result + ((totalFilesModified == null) ? 0 : totalFilesModified.hashCode());
 		result = prime * result + ((totalLinesAdded == null) ? 0 : totalLinesAdded.hashCode());
@@ -225,7 +223,6 @@ public class TeamMembersCommitDetailBasedOnPR implements Serializable {
 		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
 		return result;
 	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -258,7 +255,7 @@ public class TeamMembersCommitDetailBasedOnPR implements Serializable {
 			return false;
 		if (!Arrays.equals(linesRemovedArray, other.linesRemovedArray))
 			return false;
-		if (totalFileCount != other.totalFileCount)
+		if (!Arrays.equals(totalFileCount, other.totalFileCount))
 			return false;
 		if (totalFilesAdded == null) {
 			if (other.totalFilesAdded != null)
@@ -287,7 +284,6 @@ public class TeamMembersCommitDetailBasedOnPR implements Serializable {
 			return false;
 		return true;
 	}
-
 	@Override
 	public String toString() {
 		return "TeamMembersCommitDetailBasedOnPR [userId=" + userId + ", commitDate=" + commitDate + ", fileNameArray="

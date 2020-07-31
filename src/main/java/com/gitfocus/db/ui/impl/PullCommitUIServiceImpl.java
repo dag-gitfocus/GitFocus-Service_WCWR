@@ -99,7 +99,7 @@ public class PullCommitUIServiceImpl implements IPullCommitUIService {
 		model.setCommitDate(commDate);
 		model.setFileStatusArray(fileStatusArr);
 		model.setFileNameArray(fileNameArr);
-		model.setTotalFileCount(fileNameArr.length);
+		model.setTotalFileCount(fileNameArr);
 		model.setLinesAddedArray(linesAddedArr);
 		model.setLinesRemovedArray(linesRemovedArr);
 		model.setBranchName(branchName);

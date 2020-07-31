@@ -20,7 +20,7 @@ public interface BranchDetailsRepository extends JpaRepository<BranchDetails, Ob
      * @param repoId
      * @return branchList
      */
-    @Query("select b.bCompositeId.branchName from BranchDetails b where b.bCompositeId.repoId=:repoId")
+    @Query("select b.bCompositeId.branchName from BranchDetails b where b.bCompositeId.repoId=:repoId and b.bCompositeId.branchName!= 'staging' and b.bCompositeId.branchName!= 'master'")
     List<String> getBranchList(int repoId);
 
 }

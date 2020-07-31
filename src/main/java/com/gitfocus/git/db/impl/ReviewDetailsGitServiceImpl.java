@@ -98,7 +98,7 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 						
 						// To get review details based on all the pull history
 						reviewURI =  gitFocusConstant.BASE_URI + unitOwner + "/" + repoName
-								+ "/pulls/"+reviewPullNo+"/reviews?"+"state=all"+"&" + "page=" + page  + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE+ "&";
+								+ "/pulls/"+reviewPullNo+"/reviews?"+"state=all"+"&" +  "until=" + java.time.LocalDateTime.now() + "page=" + page  + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE+ "&";
 						reviewResults = gitUtil.getGitAPIJsonResponse(reviewURI);
 
 						try {

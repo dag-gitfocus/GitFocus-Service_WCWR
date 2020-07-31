@@ -114,7 +114,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 				branches.forEach(branchName -> {
 					for (int page = 0; page <= gitConstant.MAX_PAGE; page++) {
 						commitDetailURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits?" + "sha="
-								+ branchName + "&page=" + page + "&" + "per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE + "&";
+								+ branchName + "&"+ "until=" + java.time.LocalDateTime.now() + "&page=" + page + "&" + "per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE + "&";
 						
 						commitsResult = gitUtil.getGitAPIJsonResponse(commitDetailURI);
 						jsonResponse = new JSONArray(commitsResult);
