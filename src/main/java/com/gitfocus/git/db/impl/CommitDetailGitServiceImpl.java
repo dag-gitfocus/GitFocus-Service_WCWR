@@ -107,24 +107,24 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 
 			reposName.forEach(repoName -> {
 				repoId = uReposRepository.findRepoId(repoName);
-				
+
 				// get branches for repository
 				branches = bDetailsRepository.getBranchList(repoId);
 
 				branches.forEach(branchName -> {
-					for (int page = 0; page <= gitConstant.MAX_PAGE; page++) {
+					for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
 						commitDetailURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits?" + "sha="
-								+ branchName + "&"+ "until=" + java.time.LocalDateTime.now() + "&page=" + page + "&" + "per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE + "&";
-						
+								+ branchName + "&"+ "since="+ gitConstant.STARTDATE + "&"+ "until=" + gitConstant.ENDDATE + "&page=" + page + "&" + "per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE + "&";
+
 						commitsResult = gitUtil.getGitAPIJsonResponse(commitDetailURI);
 						jsonResponse = new JSONArray(commitsResult);
 
 						for (int i = 0; i < jsonResponse.length(); i++) {
 							commitDetailObj = jsonResponse.getJSONObject(i);
-							
+
 							commitObj1 = commitDetailObj.getJSONObject("commit");
 							commitObj2 = commitObj1.getJSONObject("author");
-							
+
 							shaId = commitDetailObj.getString("sha");
 							userId = commitObj2.getString("name");
 							commitDate = commitObj2.getString("date");
@@ -153,7 +153,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 									linesRemoved = linesRemoved	+ String.valueOf(jsonShaObj.getInt("deletions")).concat(",");
 
 									// commit_detail based on sha_id -- END
-									
+
 									// store values in commit_details table in database
 									commitCompositeId.setUnitId(unitId);
 									commitCompositeId.setShaId(shaId);

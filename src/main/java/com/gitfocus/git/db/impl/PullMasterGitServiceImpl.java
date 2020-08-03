@@ -122,10 +122,10 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 				branches = branchRepo.getBranchList(repoId);
 
 				branches.forEach(branchName -> {
-					for (int page = 0; page <= gitConstant.MAX_PAGE; page++) {
+					for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
 						// To get Pull review based on all the pull history
 						pullMasterURI = gitFocusConstant.BASE_URI + unitOwner + "/" + repoName + "/pulls?" + "state=all"
-								+ "&" +  "until=" + java.time.LocalDateTime.now() + "page=" + page + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
+								+ "&" + "since="+ gitConstant.STARTDATE + "&"+ "until=" + gitConstant.ENDDATE + "page=" + page + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
 
 						pullsResult = gitUtil.getGitAPIJsonResponse(pullMasterURI);
 						jsonPullsArray = new JSONArray(pullsResult);

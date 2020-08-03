@@ -94,11 +94,11 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 				pullNos = pullMasterRepo.findPullNo(repoId);
 
 				pullNos.forEach(reviewPullNo -> {
-					for (int page = 0; page <= gitFocusConstant.MAX_PAGE; page++) {
+					for (int page = 1; page <= gitFocusConstant.MAX_PAGE; page++) {
 						
 						// To get review details based on all the pull history
 						reviewURI =  gitFocusConstant.BASE_URI + unitOwner + "/" + repoName
-								+ "/pulls/"+reviewPullNo+"/reviews?"+"state=all"+"&" +  "until=" + java.time.LocalDateTime.now() + "page=" + page  + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE+ "&";
+								+ "/pulls/"+reviewPullNo+"/reviews?"+"state=all"+"&" + "since="+ gitFocusConstant.STARTDATE + "&"+ "until=" + gitFocusConstant.ENDDATE + "page=" + page  + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE+ "&";
 						reviewResults = gitUtil.getGitAPIJsonResponse(reviewURI);
 
 						try {
