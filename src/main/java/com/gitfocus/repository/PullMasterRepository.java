@@ -51,7 +51,7 @@ public interface PullMasterRepository extends JpaRepository<PullMaster, Object> 
 	 */
 	@Query(value = "SELECT  ur.repo_name,pm.user_id,d,count(pm.created_time)  \r\n"
 			+ "    					From wcwr_dev.pull_master pm join wcwr_dev.branch_details bd  \r\n"
-			+ "    					ON (pm.repo_id=bd.repo_id)  \r\n"
+			+ "    					ON (pm.repo_id=bd.repo_id and pm.to_branch=bd.branch_name)  \r\n"
 			+ "    					join wcwr_dev.unit_repos ur on (ur.repo_id=bd.repo_id) \r\n"
 			+ "    					RIGHT JOIN generate_series( \r\n"
 			+ "    					date_trunc('day', (cast(?3 as timestamp) - interval '6 days' )), \r\n"

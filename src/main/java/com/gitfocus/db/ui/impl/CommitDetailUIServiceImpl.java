@@ -220,6 +220,7 @@ public class CommitDetailUIServiceImpl implements ICommitDetailUIService {
 			String linesAdded = (String) obj[3];
 			String linesRemoved = (String) obj[4];
 			String commitMessage = (String) obj[5];
+			String branchName = (String) obj[6];
 
 			String[] fileNameArray = fileName.split(",");
 			String[] fileStatusArray = fileStatus.split(",");
@@ -257,6 +258,7 @@ public class CommitDetailUIServiceImpl implements ICommitDetailUIService {
 			model.setTotalLinesRemoved(totalLinesRemoved);
 			model.setTotalFilesAdded(String.valueOf(totalFilesAdded));
 			model.setTotalFilesModified(String.valueOf(totalFilesModified));
+			model.setBranchName(branchName);
 			model.setX(x);
 
 			commitList.add(model);
