@@ -1,5 +1,6 @@
 package com.gitfocus.repository;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -30,9 +31,9 @@ public interface PullMasterRepository extends JpaRepository<PullMaster, Object> 
 	 * @param endDate
 	 * @return getPullDetailsForMemberForTwoWeeks Results
 	 */
-	@Query(value = "    SELECT  ur.repo_name,pm.user_id,d,count(pm.created_time)  \r\n"
+	@Query(value = "    SELECT ur.repo_name,pm.user_id,d,count(pm.created_time)  \r\n"
 			+ "			From wcwr_dev.pull_master pm join wcwr_dev.branch_details bd  \r\n"
-			+ "			ON (pm.repo_id=bd.repo_id)  \r\n"
+			+ "			ON (pm.repo_id=bd.repo_id and pm.to_branch=bd.branch_name)  \r\n"
 			+ "			join wcwr_dev.unit_repos ur on (ur.repo_id=bd.repo_id) \r\n"
 			+ "			RIGHT JOIN generate_series( \r\n"
 			+ "			date_trunc('day', (cast(?3 as timestamp) - interval '13 days' )), \r\n"
@@ -49,7 +50,7 @@ public interface PullMasterRepository extends JpaRepository<PullMaster, Object> 
 	 * @param endDate
 	 * @return getPullDetailsForMemberForOneWeek Results
 	 */
-	@Query(value = "SELECT  ur.repo_name,pm.user_id,d,count(pm.created_time)  \r\n"
+	@Query(value = "SELECT ur.repo_name,pm.user_id,d,count(pm.created_time)  \r\n"
 			+ "    					From wcwr_dev.pull_master pm join wcwr_dev.branch_details bd  \r\n"
 			+ "    					ON (pm.repo_id=bd.repo_id and pm.to_branch=bd.branch_name)  \r\n"
 			+ "    					join wcwr_dev.unit_repos ur on (ur.repo_id=bd.repo_id) \r\n"
@@ -84,5 +85,12 @@ public interface PullMasterRepository extends JpaRepository<PullMaster, Object> 
 	@Query("select pm.createdTime, rd.reviewedAt from PullMaster pm inner join ReviewDetails rd on "
 			+ "rd.pullNumber=pm.pCompositeId.pullNumber and rd.repoId=:repoId and pm.pCompositeId.repoId=:repoId")
 	String[] getTimeToFirstComment(int repoId);
+
+	/**
+	 * 
+	 * @return created_time
+	 */
+	@Query(value = "SELECT created_time FROM wcwr_dev.pull_master ORDER BY created_time DESC LIMIT 1", nativeQuery = true)
+	Timestamp getLastPRCreatedDate();
 
 }

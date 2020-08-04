@@ -1,6 +1,8 @@
 package com.gitfocus.git.db.impl;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -99,6 +101,71 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 						// To get review details based on all the pull history
 						reviewURI =  gitFocusConstant.BASE_URI + unitOwner + "/" + repoName
 								+ "/pulls/"+reviewPullNo+"/reviews?"+"state=all"+"&" + "since="+ gitFocusConstant.STARTDATE + "&"+ "until=" + gitFocusConstant.ENDDATE + "page=" + page  + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE+ "&";
+						reviewResults = gitUtil.getGitAPIJsonResponse(reviewURI);
+
+						try {
+							reviewJson = new JSONArray(reviewResults);
+							for (int i = 0; i < reviewJson.length(); i++) {
+								reviewObj = reviewJson.getJSONObject(i);
+								reviewObjUser = reviewObj.getJSONObject("user");
+								reviewId = reviewObj.getInt("id");
+								reviewedBy = reviewObjUser.getString("login");
+								reviewComment = reviewObj.getString("body");
+								state = reviewObj.getString("state");
+								reviewedAt = reviewObj.getString("submitted_at");
+								commitId = reviewObj.getString("commit_id");
+
+								rDetailsCompositeId.setReviewId(reviewId);
+								rDetails.setrDetailCompositeId(rDetailsCompositeId);
+
+								rDetails.setUnitId(unitId);
+								rDetails.setRepoId(repoId);
+								rDetails.setPullNumber(Integer.parseInt(reviewPullNo));
+								rDetails.setReviewedBy(reviewedBy);
+								rDetails.setReviewComment(reviewComment);
+								rDetails.setState(state);
+								rDetails.setReviewedAt(GitFocusUtil.stringToDate(reviewedAt));
+								rDetails.setCommitId(commitId);
+
+								reviewRepo.save(rDetails);
+
+								logger.info("Records saved in review_details table in DB");
+							}
+
+						} catch (JSONException e) {
+							// TODO: handle exception
+							e.printStackTrace();
+						}
+					}
+				});
+			});
+		});
+		return true;
+	}
+
+	@Override
+	public boolean reviewDetailsSchedulerJob(Timestamp startDate, LocalDateTime endDate) {
+		// TODO Auto-generated method stub
+
+		List<Units> units = (List<Units>) unitsRepository.findAll();
+		if (units.isEmpty()) {
+			return result;
+		}
+		units.forEach(response -> {
+			unitId = response.getUnitId();
+			unitOwner = response.getUnitOwner();
+			reposName = uReposRepository.findReposName(unitId);
+
+			reposName.forEach(repoName -> {
+				repoId = uReposRepository.findRepoId(repoName);
+				pullNos = pullMasterRepo.findPullNo(repoId);
+
+				pullNos.forEach(reviewPullNo -> {
+					for (int page = 1; page <= gitFocusConstant.MAX_PAGE; page++) {
+						
+						// To get review details based on all the pull history
+						reviewURI =  gitFocusConstant.BASE_URI + unitOwner + "/" + repoName
+								+ "/pulls/"+reviewPullNo+"/reviews?"+"state=all"+"&" + "since="+ startDate + "&"+ "until=" + endDate + "page=" + page  + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE+ "&";
 						reviewResults = gitUtil.getGitAPIJsonResponse(reviewURI);
 
 						try {

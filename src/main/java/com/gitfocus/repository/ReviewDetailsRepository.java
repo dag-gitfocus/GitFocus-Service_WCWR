@@ -1,5 +1,6 @@
 package com.gitfocus.repository;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -50,5 +51,12 @@ public interface ReviewDetailsRepository extends JpaRepository<ReviewDetails, Ob
 			+ "and rd.reviewedAt <= cast(:endDate as date )  \r\n"
 			+ "and rd.pullNumber is not NULL order by rd.reviewedAt")
 	List<Object[]> getCommitDetailOnDateForMemebers(String userId, int repoId, Date startDate, Date endDate);
+
+	/**
+	 * 
+	 * @return last reviewedDate
+	 */
+	@Query(value = "SELECT reviewed_at FROM wcwr_dev.review_details ORDER BY reviewed_at DESC LIMIT 1", nativeQuery = true)
+	Timestamp getLastReviewDate();
 
 }

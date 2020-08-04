@@ -1,5 +1,6 @@
 package com.gitfocus.repository;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -97,5 +98,14 @@ public interface CommitDetailsRepository extends JpaRepository<CommitDetails, Ob
 			+ "and cd.cCompositeId.repoId=:repoId and cd.commitDate >=cast(:startDate as date ) and cd.commitDate <= cast(:endDate as date)"
 			+ "order by cd.commitDate")
 	List<Object[]> getDailyMemberCommitListOnDate(String userName, int repoId, Date startDate, Date endDate);
+
+	/**
+	 * 
+	 * @return commitDate
+	 */
+	@Query(value = "SELECT commit_date FROM wcwr_dev.commit_details ORDER BY commit_date DESC LIMIT 1", nativeQuery = true)
+	Timestamp getLastCommitDate();
+	
+	
 
 }

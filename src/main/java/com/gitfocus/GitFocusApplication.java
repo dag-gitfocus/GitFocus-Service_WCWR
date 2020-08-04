@@ -4,12 +4,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @author Tech Mahindra 
  * Initial class to boot GitFocus Application
  */
 @SpringBootApplication
+@EnableScheduling
 public class GitFocusApplication {
 
 	private static final Logger logger = LogManager.getLogger(GitFocusApplication.class.getSimpleName());

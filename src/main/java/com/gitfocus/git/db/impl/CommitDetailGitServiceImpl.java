@@ -1,6 +1,8 @@
 package com.gitfocus.git.db.impl;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -71,6 +73,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 	JSONObject commitDetailObj = null;
 	JSONObject commitObj1 = null;
 	JSONObject commitObj2 = null;
+	JSONObject commitObj3 = null;
 	String userId = null;
 	String commitDetailURI = null;
 	String commitDetailShaURI = null;
@@ -124,9 +127,12 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 
 							commitObj1 = commitDetailObj.getJSONObject("commit");
 							commitObj2 = commitObj1.getJSONObject("author");
+							if (commitDetailObj.has("author") && !commitDetailObj.isNull("author")) {
+								commitObj3 = commitDetailObj.getJSONObject("author");
+								userId = commitObj3.getString("login");
+							}
 
 							shaId = commitDetailObj.getString("sha");
-							userId = commitObj2.getString("name");
 							commitDate = commitObj2.getString("date");
 							cDate = GitFocusUtil.stringToDate(commitDate);
 							messgae = commitObj1.getString("message");
@@ -174,6 +180,103 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 
 									logger.info("Records saved in commit_details table in DB");
 								}
+							}
+						}
+					}
+				});
+			});
+		});
+		return true;
+	}
+
+	@Override
+	public boolean commitDetailsSchedulerJob(Timestamp startDate, LocalDateTime endDate) throws ParseException {
+		// TODO Auto-generated method stub
+
+		logger.info("commitDetailsSchedulerJob save()");
+		boolean result = false;
+		units = (List<Units>) uRepository.findAll();
+		if (units.isEmpty()) {
+			return result;
+		}
+		units.forEach(response -> {
+			unitId = response.getUnitId();
+			unitOwner = response.getUnitOwner();
+			reposName = uReposRepository.findReposName(unitId);
+
+			reposName.forEach(repoName -> {
+				repoId = uReposRepository.findRepoId(repoName);
+
+				// get branches for repository
+				branches = bDetailsRepository.getBranchList(repoId);
+
+				branches.forEach(branchName -> {
+					for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
+						commitDetailURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits?" + "sha="
+								+ branchName + "&"+ "since="+ startDate + "&"+ "until=" + endDate + "&page=" + page + "&" + "per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE + "&";
+
+						commitsResult = gitUtil.getGitAPIJsonResponse(commitDetailURI);
+						jsonResponse = new JSONArray(commitsResult);
+
+						for (int i = 0; i < jsonResponse.length(); i++) {
+							commitDetailObj = jsonResponse.getJSONObject(i);
+
+							commitObj1 = commitDetailObj.getJSONObject("commit");
+							commitObj2 = commitObj1.getJSONObject("author");
+							if (commitDetailObj.has("author") && !commitDetailObj.isNull("author")) {
+								commitObj3 = commitDetailObj.getJSONObject("author");
+								userId = commitObj3.getString("login");
+							}
+
+							shaId = commitDetailObj.getString("sha");
+							commitDate = commitObj2.getString("date");
+							cDate = GitFocusUtil.stringToDate(commitDate);
+							messgae = commitObj1.getString("message");
+
+							// commit_detail based on sha_id -- START
+							if (shaId != null) {
+
+								commitDetailShaURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits/" + shaId + "?";
+
+								commitDetailShaResult = gitUtil.getGitAPIJsonResponse(commitDetailShaURI);
+								commitDetailShaObj = new JSONObject(commitDetailShaResult);
+								commitShaArr = commitDetailShaObj.getJSONArray("files");
+
+								String fileName = null;
+								String fileStatus = null;
+								String linesAdded = null;
+								String linesRemoved = null;
+
+								for (int j = 0; j < commitShaArr.length(); j++) {
+									jsonShaObj = commitShaArr.getJSONObject(j);
+									fileName = fileName + jsonShaObj.getString("filename").concat(",");
+									fileStatus = fileStatus + jsonShaObj.getString("status").concat(",");
+									linesAdded = linesAdded	+ String.valueOf(jsonShaObj.getInt("additions")).concat(",");
+									linesRemoved = linesRemoved	+ String.valueOf(jsonShaObj.getInt("deletions")).concat(",");
+
+									// commit_detail based on sha_id -- END
+
+									// store values in commit_details table in database
+									commitCompositeId.setUnitId(unitId);
+									commitCompositeId.setShaId(shaId);
+									commitCompositeId.setRepoId(repoId);
+									commitCompositeId.setBranchName(branchName);
+
+									cDetails.setcCompositeId(commitCompositeId);
+
+									cDetails.setCommitDate(cDate);
+									cDetails.setUserId(userId);
+									cDetails.setMessage(messgae);
+									cDetails.setFileName(fileName.replace("null", ""));
+									cDetails.setFileStatus(fileStatus.replace("null", ""));
+									cDetails.setLinesAdded(linesAdded.replace("null", ""));
+									cDetails.setLinesRemoved(linesRemoved.replace("null", ""));
+
+									cDetailsRepository.save(cDetails);
+
+									logger.info("Records saved in commit_details table in DB --  through scheduler");
+								}
+								logger.info("CommitDetailGitServiceImpl Scheduler Task Completed Successfully .....!");
 							}
 						}
 					}

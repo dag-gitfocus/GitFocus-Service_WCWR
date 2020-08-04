@@ -1,6 +1,7 @@
 package com.gitfocus.git.db.impl;
 
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -95,6 +96,78 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 						for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
 							pullCommitURI = gitConstant.BASE_URI + unitOwner + "/" + repoName
 									+ "/pulls/"+pullNo+"/commits?"+"state=all"+"&" + "since="+ gitConstant.STARTDATE + "&"+ "until=" + gitConstant.ENDDATE + "page=" + page  + "&per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE+ "&";
+							pNUmber = Integer.parseInt(pullNo);
+
+							// sometimes pull number might be 0
+							// in that case just ignore the pull request which has pull number 0
+							if(pNUmber == 0) {
+								continue;
+							} else {
+								pullCommitResult = gitUtil.getGitAPIJsonResponse(pullCommitURI);
+								jsonArr = new JSONArray(pullCommitResult);
+
+								try {
+									jsonArr = new JSONArray(pullCommitResult);
+									for (int i = 0; i < jsonArr.length(); i++) {
+										jsonObj = jsonArr.getJSONObject(i);
+										sha_id = jsonObj.getString("sha");
+										// get branches based on repoId and sha_id
+										// sometimes one branch has multiple repoId and sha_id
+										branches = commitRepo.getBranchNameByShaIdAndRepoId(repoId, sha_id);
+										branches.forEach(branchName -> {
+											repoId = uRepository.findRepoId(repoName);
+											pullCompositeId.setRepoId(repoId);
+											pullCompositeId.setPullNumber(Integer.parseInt(pullNo));
+											pullCompositeId.setCommitId(sha_id);
+											pullCompositeId.setBranchName(branchName);
+
+											pCommit.setpCompositeId(pullCompositeId);
+											pCommit.setUnitId(unitId);
+
+											pullCommitRepo.save(pCommit);
+
+											logger.info("Records saved in pull_commit table in DB");
+										});
+									}
+								}
+								catch (JSONException e) {
+									// TODO: handle exception
+									e.printStackTrace();
+								}
+							}
+						}
+					});
+				});
+			});
+		}
+		return true;
+	}
+
+	@Override
+	public boolean pullCommitSchedulerJob(LocalDateTime startDate, LocalDateTime endDate) {
+		// TODO Auto-generated method stub
+
+		// TODO Auto-generated method stub
+		boolean result = false;
+		units = uReposRepository.findAll();
+		if (units.isEmpty()) {
+			return result;
+		} else if (!units.isEmpty()) {
+
+			units.forEach(response -> {
+				unitId = response.getUnitId();
+				unitOwner = response.getUnitOwner();
+				reposName = uRepository.findReposName(unitId);
+
+				reposName.forEach(repoName -> {
+					repoId = uRepository.findRepoId(repoName);
+
+					// get pull numbers for each pull request
+					pullNos = pullMasterRepo.findPullNo(repoId);
+					pullNos.forEach(pullNo -> {
+						for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
+							pullCommitURI = gitConstant.BASE_URI + unitOwner + "/" + repoName
+									+ "/pulls/"+pullNo+"/commits?"+"state=all"+"&" + "since="+ startDate + "&"+ "until=" + endDate + "page=" + page  + "&per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE+ "&";
 							pNUmber = Integer.parseInt(pullNo);
 
 							// sometimes pull number might be 0
