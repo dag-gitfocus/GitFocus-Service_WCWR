@@ -198,7 +198,7 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 
 											pullCommitRepo.save(pCommit);
 
-											logger.info("Records saved in pull_commit table in DB");
+											logger.info("Records saved in pull_commit table in DB --  through scheduler");
 										});
 									}
 								}
@@ -206,11 +206,13 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 									// TODO: handle exception
 									e.printStackTrace();
 								}
+
 							}
 						}
 					});
 				});
 			});
+			logger.info("PullCommitDetailGitServiceImpl Scheduler Task Completed Successfully .....!");
 		}
 		return true;
 	}

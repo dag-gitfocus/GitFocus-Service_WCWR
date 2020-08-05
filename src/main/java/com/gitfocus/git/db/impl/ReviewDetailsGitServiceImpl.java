@@ -97,7 +97,7 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 
 				pullNos.forEach(reviewPullNo -> {
 					for (int page = 1; page <= gitFocusConstant.MAX_PAGE; page++) {
-						
+
 						// To get review details based on all the pull history
 						reviewURI =  gitFocusConstant.BASE_URI + unitOwner + "/" + repoName
 								+ "/pulls/"+reviewPullNo+"/reviews?"+"state=all"+"&" + "since="+ gitFocusConstant.STARTDATE + "&"+ "until=" + gitFocusConstant.ENDDATE + "page=" + page  + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE+ "&";
@@ -162,7 +162,7 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 
 				pullNos.forEach(reviewPullNo -> {
 					for (int page = 1; page <= gitFocusConstant.MAX_PAGE; page++) {
-						
+
 						// To get review details based on all the pull history
 						reviewURI =  gitFocusConstant.BASE_URI + unitOwner + "/" + repoName
 								+ "/pulls/"+reviewPullNo+"/reviews?"+"state=all"+"&" + "since="+ startDate + "&"+ "until=" + endDate + "page=" + page  + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE+ "&";
@@ -194,7 +194,7 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 
 								reviewRepo.save(rDetails);
 
-								logger.info("Records saved in review_details table in DB");
+								logger.info("Records saved in review_details table in DB --  through scheduler ");
 							}
 
 						} catch (JSONException e) {
@@ -204,6 +204,7 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 					}
 				});
 			});
+			logger.info("ReviewDetailGitServiceImpl Scheduler Task Completed Successfully .....!");
 		});
 		return true;
 	}

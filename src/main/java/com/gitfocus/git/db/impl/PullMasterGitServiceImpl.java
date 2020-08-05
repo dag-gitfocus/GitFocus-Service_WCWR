@@ -329,11 +329,12 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 
 							pMasterRepository.save(pMaster);
 
-							logger.info("Records saved in PullMaster table in DB ");
+							logger.info("Records saved in PullMaster table in DB --  through scheduler");
 						}
 					}
 				});
 			});
+			logger.info("PullMasterDetailGitServiceImpl Scheduler Task Completed Successfully .....!");
 		});
 		return true;
 	}
