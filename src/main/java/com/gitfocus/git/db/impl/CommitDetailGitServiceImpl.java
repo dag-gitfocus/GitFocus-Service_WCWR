@@ -3,6 +3,7 @@ package com.gitfocus.git.db.impl;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import com.gitfocus.git.db.model.Units;
 import com.gitfocus.git.db.service.ICommitDetailGitService;
 import com.gitfocus.repository.BranchDetailsRepository;
 import com.gitfocus.repository.CommitDetailsRepository;
+import com.gitfocus.repository.GitFocusSchedulerRepository;
 import com.gitfocus.repository.TeamMembersRepository;
 import com.gitfocus.repository.UnitReposRepository;
 import com.gitfocus.repository.UnitsRepository;
@@ -57,6 +59,8 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 	GitFocusUtil gitUtil;
 	@Autowired
 	CommitDetailsRepository commitRepository;
+	@Autowired 
+	GitFocusSchedulerRepository gitFocusSchedulerRepo;
 	@Autowired
 	TeamMembersRepository teamMemRepos;
 
@@ -87,6 +91,10 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 	String messgae = null;
 	List<String> reposName = null;
 	List<String> branches = null;
+	String errorMessage = null;
+	boolean schedulerResult = false;
+	Timestamp startDate = null;
+	LocalDateTime endDate = null;
 	CommitDetails cDetails = new CommitDetails();
 	CommitDetailsCompositeId commitCompositeId = new CommitDetailsCompositeId();
 
@@ -189,16 +197,17 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 		return true;
 	}
 
+	/**
+	 * Method to execute scheduler jobs for commit details
+	 * Get the repository and branch
+	 */
 	@Override
-	public boolean commitDetailsSchedulerJob(Timestamp startDate, LocalDateTime endDate) throws ParseException {
+	public void commitDetailsSchedulerJob() throws ParseException {
 		// TODO Auto-generated method stub
 
 		logger.info("commitDetailsSchedulerJob save()");
-		boolean result = false;
+
 		units = (List<Units>) uRepository.findAll();
-		if (units.isEmpty()) {
-			return result;
-		}
 		units.forEach(response -> {
 			unitId = response.getUnitId();
 			unitOwner = response.getUnitOwner();
@@ -211,78 +220,143 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 				branches = bDetailsRepository.getBranchList(repoId);
 
 				branches.forEach(branchName -> {
-					for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
-						commitDetailURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits?" + "sha="
-								+ branchName + "&"+ "since="+ startDate + "&"+ "until=" + endDate + "&page=" + page + "&" + "per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE + "&";
+					commitDetailsSchedulerJobToSaveRecordsInDB(repoName, branchName);
 
-						commitsResult = gitUtil.getGitAPIJsonResponse(commitDetailURI);
-						jsonResponse = new JSONArray(commitsResult);
-
-						for (int i = 0; i < jsonResponse.length(); i++) {
-							commitDetailObj = jsonResponse.getJSONObject(i);
-
-							commitObj1 = commitDetailObj.getJSONObject("commit");
-							commitObj2 = commitObj1.getJSONObject("author");
-							if (commitDetailObj.has("author") && !commitDetailObj.isNull("author")) {
-								commitObj3 = commitDetailObj.getJSONObject("author");
-								userId = commitObj3.getString("login");
-							}
-
-							shaId = commitDetailObj.getString("sha");
-							commitDate = commitObj2.getString("date");
-							cDate = GitFocusUtil.stringToDate(commitDate);
-							messgae = commitObj1.getString("message");
-
-							// commit_detail based on sha_id -- START
-							if (shaId != null) {
-
-								commitDetailShaURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits/" + shaId + "?";
-
-								commitDetailShaResult = gitUtil.getGitAPIJsonResponse(commitDetailShaURI);
-								commitDetailShaObj = new JSONObject(commitDetailShaResult);
-								commitShaArr = commitDetailShaObj.getJSONArray("files");
-
-								String fileName = null;
-								String fileStatus = null;
-								String linesAdded = null;
-								String linesRemoved = null;
-
-								for (int j = 0; j < commitShaArr.length(); j++) {
-									jsonShaObj = commitShaArr.getJSONObject(j);
-									fileName = fileName + jsonShaObj.getString("filename").concat(",");
-									fileStatus = fileStatus + jsonShaObj.getString("status").concat(",");
-									linesAdded = linesAdded	+ String.valueOf(jsonShaObj.getInt("additions")).concat(",");
-									linesRemoved = linesRemoved	+ String.valueOf(jsonShaObj.getInt("deletions")).concat(",");
-
-									// commit_detail based on sha_id -- END
-
-									// store values in commit_details table in database
-									commitCompositeId.setUnitId(unitId);
-									commitCompositeId.setShaId(shaId);
-									commitCompositeId.setRepoId(repoId);
-									commitCompositeId.setBranchName(branchName);
-
-									cDetails.setcCompositeId(commitCompositeId);
-
-									cDetails.setCommitDate(cDate);
-									cDetails.setUserId(userId);
-									cDetails.setMessage(messgae);
-									cDetails.setFileName(fileName.replace("null", ""));
-									cDetails.setFileStatus(fileStatus.replace("null", ""));
-									cDetails.setLinesAdded(linesAdded.replace("null", ""));
-									cDetails.setLinesRemoved(linesRemoved.replace("null", ""));
-
-									cDetailsRepository.save(cDetails);
-
-									logger.info("Records saved in commit_details table in DB --  through scheduler");
-								}
-								logger.info("CommitDetailGitServiceImpl Scheduler Task Completed Successfully .....!");
-							}
-						}
-					}
 				});
 			});
 		});
-		return true;
+	}
+
+	/**
+	 * Method to save the values in commit_details table in DB through scheduler
+	 * Capture scheduler events and log to gitservice_scheduler_status tables DB table
+	 * 
+	 * @param repoName
+	 * @param branchName
+	 */
+	private void commitDetailsSchedulerJobToSaveRecordsInDB(String repoName, String branchName) {
+		// TODO Auto-generated method stub
+		logger.info("commitDetailsSchedulerJobToSaveRecordsInDB()" + repoName + branchName);
+		String serviceName = "CommitDetail Service";
+		String status;
+
+		//get the last scheduler status for each repository and branch whether its success or failure
+		status = gitFocusSchedulerRepo.getSeriveStatus(repoName, branchName);
+		repoId = uReposRepository.findRepoId(repoName);
+
+		// getting records first time from table might be null in status column
+		// if service status success then fetch last commit date for each repository and branch 
+		if(status == null || status.equalsIgnoreCase("success")) {
+			startDate = commitRepository.getLastSuccessfulCommitDate(repoId, branchName);
+			endDate = LocalDateTime.now();
+		}
+		// if service status failure then fetch last scheduler exec time for failed repository and branch
+		else if (status.equalsIgnoreCase("failure")) {
+			// get the last commit details scheduler status for failed repository and branch
+			startDate = gitFocusSchedulerRepo.getLastExecTime(repoName, branchName);
+			endDate = LocalDateTime.now();
+		}
+		// hit the git and get json response based on success or failure for commit details
+		for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
+			try {
+				commitDetailURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits?" + "sha="
+						+ branchName + "&"+ "since="+ startDate + "&"+ "until=" + endDate + "&page=" + page + "&" + "per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE + "&";
+
+				commitsResult = gitUtil.getGitAPIJsonResponse(commitDetailURI);
+				jsonResponse = new JSONArray(commitsResult);
+
+				for (int i = 0; i < jsonResponse.length(); i++) {
+					commitDetailObj = jsonResponse.getJSONObject(i);
+
+					commitObj1 = commitDetailObj.getJSONObject("commit");
+					commitObj2 = commitObj1.getJSONObject("author");
+					if (commitDetailObj.has("author") && !commitDetailObj.isNull("author")) {
+						commitObj3 = commitDetailObj.getJSONObject("author");
+						userId = commitObj3.getString("login");
+					}
+
+					shaId = commitDetailObj.getString("sha");
+					commitDate = commitObj2.getString("date");
+					cDate = GitFocusUtil.stringToDate(commitDate);
+					messgae = commitObj1.getString("message");
+
+					if (shaId != null) {
+						commitDetailShaURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits/" + shaId + "?";
+						commitDetailShaResult = gitUtil.getGitAPIJsonResponse(commitDetailShaURI);
+						commitDetailShaObj = new JSONObject(commitDetailShaResult);
+						commitShaArr = commitDetailShaObj.getJSONArray("files");
+
+						String fileName = null;
+						String fileStatus = null;
+						String linesAdded = null;
+						String linesRemoved = null;
+
+						for (int j = 0; j < commitShaArr.length(); j++) {
+							jsonShaObj = commitShaArr.getJSONObject(j);
+							fileName = fileName + jsonShaObj.getString("filename").concat(",");
+							fileStatus = fileStatus + jsonShaObj.getString("status").concat(",");
+							linesAdded = linesAdded	+ String.valueOf(jsonShaObj.getInt("additions")).concat(",");
+							linesRemoved = linesRemoved	+ String.valueOf(jsonShaObj.getInt("deletions")).concat(",");
+
+							// store values in commit_details table in database
+							commitCompositeId.setUnitId(unitId);
+							commitCompositeId.setShaId(shaId);
+							commitCompositeId.setRepoId(repoId);
+							commitCompositeId.setBranchName(branchName);
+
+							cDetails.setcCompositeId(commitCompositeId);
+
+							cDetails.setCommitDate(cDate);
+							cDetails.setUserId(userId);
+							cDetails.setMessage(messgae);
+							cDetails.setFileName(fileName.replace("null", ""));
+							cDetails.setFileStatus(fileStatus.replace("null", ""));
+							cDetails.setLinesAdded(linesAdded.replace("null", ""));
+							cDetails.setLinesRemoved(linesRemoved.replace("null", ""));
+
+							cDetailsRepository.save(cDetails);
+							
+							logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() Scheduler completed Succesfully for " + repoName + branchName);
+						}
+					}
+				}
+			} catch (Exception ex) {
+				// TODO: handle exception
+				errorMessage= ex.getMessage();
+				ex.printStackTrace();
+			}
+		}
+
+		if(!jsonResponse.isEmpty()) {
+			// has some commit details for particular time period and scheduler job status is success
+			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() scheduler status success");
+			String serviceStatus = "success";
+			LocalDateTime localDateTime = LocalDateTime.now();
+			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			String errorMsg = "";
+			// capture and save scheduler status in gitservice_scheduler_status table in DB for successful scheduler job
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMsg, serviceExecTime);
+
+		} if (jsonResponse.isEmpty()) {
+			// sometimes may not have commit details records for particular time period
+			// consider this scenario is success but there is no records
+			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() may not have commit details records for particular time period" + startDate + endDate);
+			String serviceStatus = "success";
+			String errorMsg = "Sceduler completed Job but there is no commit details records between "+startDate+" + and + "+endDate+"";
+			LocalDateTime localDateTime = LocalDateTime.now();
+			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			// capture and save scheduler status in gitservice_scheduler_status table for there is no commit details
+			// record for particular time period
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMsg, serviceExecTime);
+
+		} if (errorMessage != null) {
+			// has some exception while running scheduler 
+			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() scheduler status failure");
+			String serviceStatus = "failure";
+			LocalDateTime localDateTime = LocalDateTime.now();
+			Date serviceExecTime = Date.from(localDateTime.atZone( ZoneId.systemDefault()).toInstant());
+			// log exception details in gitservice_scheduler_status table in DB
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
+		}
 	}
 }

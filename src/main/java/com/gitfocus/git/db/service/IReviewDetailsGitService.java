@@ -1,8 +1,6 @@
 package com.gitfocus.git.db.service;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.time.LocalDateTime;
 
 /**
  * @author Tech Mahindra
@@ -23,6 +21,6 @@ public interface IReviewDetailsGitService {
 	 * @param now
 	 * @return
 	 */
-	boolean reviewDetailsSchedulerJob(Timestamp startDate, LocalDateTime endDate);
+	boolean reviewDetailsSchedulerJob();
 
 }

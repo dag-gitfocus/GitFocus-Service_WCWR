@@ -1,7 +1,5 @@
 package com.gitfocus.git.db.impl;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -222,7 +220,7 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 	}
 
 	@Override
-	public boolean pullMasterSchedulerJob(Timestamp startDate, LocalDateTime endDate) {
+	public boolean pullMasterSchedulerJob() {
 		// TODO Auto-generated method stub
 
 		List<Units> units = (List<Units>) unitsRepository.findAll();
@@ -244,7 +242,7 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 					for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
 						// To get Pull review based on all the pull history
 						pullMasterURI = gitFocusConstant.BASE_URI + unitOwner + "/" + repoName + "/pulls?" + "state=all"
-								+ "&" + "since="+ startDate + "&"+ "until=" + endDate + "page=" + page + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
+								+ "&" + "since="+ gitConstant.STARTDATE + "&"+ "until=" + gitConstant.ENDDATE + "page=" + page + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
 
 						pullsResult = gitUtil.getGitAPIJsonResponse(pullMasterURI);
 						jsonPullsArray = new JSONArray(pullsResult);

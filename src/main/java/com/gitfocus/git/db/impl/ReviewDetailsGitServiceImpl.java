@@ -1,8 +1,6 @@
 package com.gitfocus.git.db.impl;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -144,7 +142,7 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 	}
 
 	@Override
-	public boolean reviewDetailsSchedulerJob(Timestamp startDate, LocalDateTime endDate) {
+	public boolean reviewDetailsSchedulerJob() {
 		// TODO Auto-generated method stub
 
 		List<Units> units = (List<Units>) unitsRepository.findAll();
@@ -165,7 +163,7 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 
 						// To get review details based on all the pull history
 						reviewURI =  gitFocusConstant.BASE_URI + unitOwner + "/" + repoName
-								+ "/pulls/"+reviewPullNo+"/reviews?"+"state=all"+"&" + "since="+ startDate + "&"+ "until=" + endDate + "page=" + page  + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE+ "&";
+								+ "/pulls/"+reviewPullNo+"/reviews?"+"state=all"+"&" + "since="+ gitFocusConstant.STARTDATE + "&"+ "until=" + gitFocusConstant.ENDDATE + "page=" + page  + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE+ "&";
 						reviewResults = gitUtil.getGitAPIJsonResponse(reviewURI);
 
 						try {

@@ -1,7 +1,6 @@
 package com.gitfocus.git.db.service;
 
 import java.text.ParseException;
-import java.time.LocalDateTime;
 
 /**
  * @author Tech Mahindra
@@ -21,6 +20,6 @@ public interface IPullCommitGitService {
 	 * @param now
 	 * @return
 	 */
-	boolean pullCommitSchedulerJob(LocalDateTime startDate, LocalDateTime endDate);
+	boolean pullCommitSchedulerJob();
 
 }

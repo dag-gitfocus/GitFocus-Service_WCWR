@@ -28,7 +28,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.gitfocus.git.db.model.GitServiceSchedulersStatus;
 import com.gitfocus.git.db.model.Units;
+import com.gitfocus.repository.GitFocusSchedulerRepository;
 import com.gitfocus.repository.UnitsRepository;
 
 /**
@@ -49,6 +51,8 @@ public class GitFocusUtil {
 
 	@Autowired
 	private UnitsRepository uRepository;
+	@Autowired
+	GitFocusSchedulerRepository gitSchedulerRepo;
 
 	String accessToken = null;
 	RestTemplate restTemplate = null;
@@ -166,7 +170,7 @@ public class GitFocusUtil {
 		long hoursBetweenDates = 0;
 		long miniutesBetweenDates = 0;
 		boolean sameDay = false;
-		
+
 		Map<Long, String> noOfDaysBetweenDatesOrHoursMap = new HashMap<Long, String>();
 		LocalDateTime d1 = LocalDateTime.parse(createdDate.substring(0, 19), dtf);
 		LocalDateTime d2 = LocalDateTime.parse(reviewedDate.substring(0, 19), dtf);
@@ -178,17 +182,43 @@ public class GitFocusUtil {
 			// get hours between createdDate and reviewedDate
 			if(hoursBetweenDates > 1) {
 				noOfDaysBetweenDatesOrHoursMap.put(hoursBetweenDates, "Hours");
-			// get minutes between createdDate and reviewedDate	
+				// get minutes between createdDate and reviewedDate	
 			} else if (hoursBetweenDates == 0 && hoursBetweenDates < 1 ) {
 				miniutesBetweenDates = ChronoUnit.MINUTES.between(d1, d2);
 				noOfDaysBetweenDatesOrHoursMap.put(miniutesBetweenDates, "Miniutes");
 			}
-		// if createdDate and reviewedDate dates aren't same day then calculate days
+			// if createdDate and reviewedDate dates aren't same day then calculate days
 		} else {
 			noOfDaysBetweenDatesOrHours = ChronoUnit.DAYS.between(d1, d2);
 			noOfDaysBetweenDatesOrHoursMap.put(noOfDaysBetweenDatesOrHours, "Days");
 		}
 
 		return noOfDaysBetweenDatesOrHoursMap.entrySet().stream().collect(Collectors.toList());
+	}
+
+	/**
+	 * Method to save scheduler events in gitservice_scheduler_status table in DB
+	 * 
+	 * @param repoName
+	 * @param branchName
+	 * @param serviceName
+	 * @param status
+	 * @param errorException
+	 * @param serviceExecTime
+	 */
+	public void schedulerJobEventsToSaveInDB(String repoName, String branchName, String serviceName, String status, String errorException, Date serviceExecTime) {
+		// TODO Auto-generated method stub
+		logger.info("schedulerJobEventsToSaveInDB()" + repoName + branchName + serviceName + status + errorException + serviceExecTime);
+		GitServiceSchedulersStatus gs = new GitServiceSchedulersStatus();
+		gs.setRepositoryName(repoName);
+		gs.setBranchName(branchName);
+		gs.setServiceName(serviceName);
+		gs.setStatus(status);
+		gs.setErrorException(errorException);
+		gs.setServiceExecTime(serviceExecTime);
+
+		gitSchedulerRepo.save(gs);
+		
+		logger.info("Records saved successfully in gitservice_scheduler_status DB Table for service() " + serviceName + " and the staus is " + status );
 	}
 }

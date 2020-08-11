@@ -1,7 +1,6 @@
 package com.gitfocus.git.db.impl;
 
 import java.text.ParseException;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -144,7 +143,7 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 	}
 
 	@Override
-	public boolean pullCommitSchedulerJob(LocalDateTime startDate, LocalDateTime endDate) {
+	public boolean pullCommitSchedulerJob() {
 		// TODO Auto-generated method stub
 
 		// TODO Auto-generated method stub
@@ -167,7 +166,7 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 					pullNos.forEach(pullNo -> {
 						for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
 							pullCommitURI = gitConstant.BASE_URI + unitOwner + "/" + repoName
-									+ "/pulls/"+pullNo+"/commits?"+"state=all"+"&" + "since="+ startDate + "&"+ "until=" + endDate + "page=" + page  + "&per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE+ "&";
+									+ "/pulls/"+pullNo+"/commits?"+"state=all"+"&" + "since="+ gitConstant.STARTDATE + "&"+ "until=" + gitConstant.ENDDATE + "page=" + page  + "&per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE+ "&";
 							pNUmber = Integer.parseInt(pullNo);
 
 							// sometimes pull number might be 0

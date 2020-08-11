@@ -101,10 +101,13 @@ public interface CommitDetailsRepository extends JpaRepository<CommitDetails, Ob
 
 	/**
 	 * 
-	 * @return commitDate
+	 * @param repoId
+	 * @param branchName
+	 * @return commit_date
 	 */
-	@Query(value = "SELECT commit_date FROM wcwr_dev.commit_details ORDER BY commit_date DESC LIMIT 1", nativeQuery = true)
-	Timestamp getLastCommitDate();
+	@Query(value = "SELECT commit_date FROM wcwr_dev.commit_details where repo_id=:repoId and branch_name=:branchName order by commit_date DESC LIMIT 1", nativeQuery = true)
+	Timestamp getLastSuccessfulCommitDate(int repoId, String branchName);
+
 	
 	
 
