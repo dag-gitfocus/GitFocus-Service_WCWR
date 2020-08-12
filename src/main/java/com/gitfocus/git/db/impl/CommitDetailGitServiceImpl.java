@@ -315,7 +315,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 							cDetails.setLinesRemoved(linesRemoved.replace("null", ""));
 
 							cDetailsRepository.save(cDetails);
-							
+
 							logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() Scheduler completed Succesfully for " + repoName + branchName);
 						}
 					}
@@ -340,7 +340,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 		} if (jsonResponse.isEmpty()) {
 			// sometimes may not have commit details records for particular time period
 			// consider this scenario is success but there is no records
-			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() may not have commit details records for particular time period" + startDate + endDate);
+			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() may not have commit details records for particular time period "+startDate+" + and + "+endDate+"");
 			String serviceStatus = "success";
 			String errorMsg = "Sceduler completed Job but there is no commit details records between "+startDate+" + and + "+endDate+"";
 			LocalDateTime localDateTime = LocalDateTime.now();

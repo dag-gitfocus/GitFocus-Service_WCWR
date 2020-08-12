@@ -92,7 +92,7 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 	JSONObject pullObjUserId = null;
 	String createdTime = null;
 	String updatedTime = null;
-	JSONArray jsonPullsArray = null;
+	JSONArray jsonResponse = null;
 	boolean result = false;
 	List<String> branches = null;
 
@@ -128,11 +128,11 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 								+ "&" + "since="+ gitConstant.STARTDATE + "&"+ "until=" + gitConstant.ENDDATE + "page=" + page + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
 
 						pullsResult = gitUtil.getGitAPIJsonResponse(pullMasterURI);
-						jsonPullsArray = new JSONArray(pullsResult);
+						jsonResponse = new JSONArray(pullsResult);
 
-						for (int i = 0; i < jsonPullsArray.length(); i++) {
+						for (int i = 0; i < jsonResponse.length(); i++) {
 
-							pullObj = jsonPullsArray.getJSONObject(i);
+							pullObj = jsonResponse.getJSONObject(i);
 							pullObjHead = pullObj.getJSONObject("head");
 							pullObjBase = pullObj.getJSONObject("base");
 							pullObjUserId = pullObj.getJSONObject("user");
@@ -219,6 +219,10 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 		return true;
 	}
 
+	/**
+	 * Method to execute scheduler jobs for pull master
+	 * Get the repository and branch
+	 */
 	@Override
 	public boolean pullMasterSchedulerJob() {
 		// TODO Auto-generated method stub
@@ -239,101 +243,116 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 				branches = branchRepo.getBranchList(repoId);
 
 				branches.forEach(branchName -> {
-					for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
-						// To get Pull review based on all the pull history
-						pullMasterURI = gitFocusConstant.BASE_URI + unitOwner + "/" + repoName + "/pulls?" + "state=all"
-								+ "&" + "since="+ gitConstant.STARTDATE + "&"+ "until=" + gitConstant.ENDDATE + "page=" + page + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
-
-						pullsResult = gitUtil.getGitAPIJsonResponse(pullMasterURI);
-						jsonPullsArray = new JSONArray(pullsResult);
-
-						for (int i = 0; i < jsonPullsArray.length(); i++) {
-
-							pullObj = jsonPullsArray.getJSONObject(i);
-							pullObjHead = pullObj.getJSONObject("head");
-							pullObjBase = pullObj.getJSONObject("base");
-							pullObjUserId = pullObj.getJSONObject("user");
-
-							pullNo = pullObj.getInt("number");
-
-							pullCompositeId.setRepoId(repoId);
-							pullCompositeId.setPullNumber(pullNo);
-
-							pMaster.setPullMasterCompositeId(pullCompositeId);
-
-							pMaster.setUnitId(unitId);
-							pullId = pullObj.getInt("id");
-							fromBranch = pullObjHead.getString("ref");
-							toBranch = pullObjBase.getString("ref");
-							createdTime = pullObj.getString("created_at");
-							updatedTime = pullObj.getString("updated_at");
-							creTime = GitFocusUtil.stringToDate(createdTime);
-							pullState = pullObj.getString("state");
-							updTime = GitFocusUtil.stringToDate(updatedTime);
-							userId = pullObjUserId.getString("login");
-
-							// To get Pull review based on pull number -- START
-
-							pullNoUri = gitFocusConstant.BASE_URI + unitOwner + "/" + repoName + "/pulls/" + pullNo
-									+ "?" + "state=all" + "&" + "page=" + page + "&per_page="
-									+ gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
-
-							pullNoResults = gitUtil.getGitAPIJsonResponse(pullNoUri);
-							pullNoObjJson = new JSONObject(pullNoResults);
-
-							commitCount = pullNoObjJson.getInt("commits");
-							merged = pullNoObjJson.getBoolean("merged");
-							cTime = pullNoObjJson.get("closed_at");
-							mTime = pullNoObjJson.get("merged_at");
-
-							// merged_by
-							Object mergValue = pullNoObjJson.get("merged_by");
-							if (mergValue instanceof JSONObject) {
-								mergBy = pullNoObjJson.getJSONObject("merged_by");
-								mergedBy = mergBy.getString("login");
-								pMaster.setMergedBy(mergedBy);
-							} else {
-								mergedByNull = pullNoObjJson.get("merged_by");
-								pMaster.setMergedBy(String.valueOf(mergedByNull));
-							}
-							// closed_at
-							if (!cTime.equals(null)) {
-								closedAt = GitFocusUtil.stringToDate(String.valueOf(cTime));
-								pMaster.setClosedAt(closedAt);
-							} else {
-								pMaster.setClosedAt(null);
-							}
-							// merged_at
-							if (!mTime.equals(null)) {
-								mergAt = GitFocusUtil.stringToDate(String.valueOf(mTime));
-								pMaster.setMergedAt(mergAt);
-							} else {
-								pMaster.setMergedAt(null);
-							}
-
-							// To get Pull review based on pull number -- END
-
-							// Store values in pull_master table in DB
-							pMaster.setPullId(pullId);
-							pMaster.setFromBranch(fromBranch);
-							pMaster.setToBranch(toBranch); 
-							pMaster.setCreatedTime(creTime);
-							pMaster.setPullStatus(pullState);
-							pMaster.setUserId(userId);
-							pMaster.setUpdatedTime(updTime);
-							pMaster.setCommitCount(commitCount);
-							pMaster.setMerged(merged);
-							pMaster.setClosedAt(closedAt);
-
-							pMasterRepository.save(pMaster);
-
-							logger.info("Records saved in PullMaster table in DB --  through scheduler");
-						}
-					}
+					pullMasterSchedulerJobToSaveRecordsInDB(repoName, branchName);
 				});
 			});
-			logger.info("PullMasterDetailGitServiceImpl Scheduler Task Completed Successfully .....!");
 		});
 		return true;
+	}
+
+	/**
+	 * Method to save the values in pull_master table in DB through scheduler
+	 * Capture scheduler events and log to gitservice_scheduler_status tables DB table
+	 * @param repoName
+	 * @param branchName
+	 */
+	private void pullMasterSchedulerJobToSaveRecordsInDB(String repoName, String branchName) {
+		// TODO Auto-generated method stub
+		logger.info("pullMasterSchedulerJobToSaveRecordsInDB()" + repoName + branchName);
+		String serviceName = "Pullmaster Service";
+		String status;
+
+		for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
+			// To get Pull review based on all the pull history
+			pullMasterURI = gitFocusConstant.BASE_URI + unitOwner + "/" + repoName + "/pulls?" + "state=all"
+					+ "&" + "since="+ gitConstant.STARTDATE + "&"+ "until=" + gitConstant.ENDDATE + "page=" + page + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
+
+			pullsResult = gitUtil.getGitAPIJsonResponse(pullMasterURI);
+			jsonResponse = new JSONArray(pullsResult);
+
+			for (int i = 0; i < jsonResponse.length(); i++) {
+
+				pullObj = jsonResponse.getJSONObject(i);
+				pullObjHead = pullObj.getJSONObject("head");
+				pullObjBase = pullObj.getJSONObject("base");
+				pullObjUserId = pullObj.getJSONObject("user");
+
+				pullNo = pullObj.getInt("number");
+
+				pullCompositeId.setRepoId(repoId);
+				pullCompositeId.setPullNumber(pullNo);
+
+				pMaster.setPullMasterCompositeId(pullCompositeId);
+
+				pMaster.setUnitId(unitId);
+				pullId = pullObj.getInt("id");
+				fromBranch = pullObjHead.getString("ref");
+				toBranch = pullObjBase.getString("ref");
+				createdTime = pullObj.getString("created_at");
+				updatedTime = pullObj.getString("updated_at");
+				creTime = GitFocusUtil.stringToDate(createdTime);
+				pullState = pullObj.getString("state");
+				updTime = GitFocusUtil.stringToDate(updatedTime);
+				userId = pullObjUserId.getString("login");
+
+				// To get Pull review based on pull number -- START
+
+				pullNoUri = gitFocusConstant.BASE_URI + unitOwner + "/" + repoName + "/pulls/" + pullNo
+						+ "?" + "state=all" + "&" + "page=" + page + "&per_page="
+						+ gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
+
+				pullNoResults = gitUtil.getGitAPIJsonResponse(pullNoUri);
+				pullNoObjJson = new JSONObject(pullNoResults);
+
+				commitCount = pullNoObjJson.getInt("commits");
+				merged = pullNoObjJson.getBoolean("merged");
+				cTime = pullNoObjJson.get("closed_at");
+				mTime = pullNoObjJson.get("merged_at");
+
+				// merged_by
+				Object mergValue = pullNoObjJson.get("merged_by");
+				if (mergValue instanceof JSONObject) {
+					mergBy = pullNoObjJson.getJSONObject("merged_by");
+					mergedBy = mergBy.getString("login");
+					pMaster.setMergedBy(mergedBy);
+				} else {
+					mergedByNull = pullNoObjJson.get("merged_by");
+					pMaster.setMergedBy(String.valueOf(mergedByNull));
+				}
+				// closed_at
+				if (!cTime.equals(null)) {
+					closedAt = GitFocusUtil.stringToDate(String.valueOf(cTime));
+					pMaster.setClosedAt(closedAt);
+				} else {
+					pMaster.setClosedAt(null);
+				}
+				// merged_at
+				if (!mTime.equals(null)) {
+					mergAt = GitFocusUtil.stringToDate(String.valueOf(mTime));
+					pMaster.setMergedAt(mergAt);
+				} else {
+					pMaster.setMergedAt(null);
+				}
+
+				// To get Pull review based on pull number -- END
+
+				// Store values in pull_master table in DB
+				pMaster.setPullId(pullId);
+				pMaster.setFromBranch(fromBranch);
+				pMaster.setToBranch(toBranch); 
+				pMaster.setCreatedTime(creTime);
+				pMaster.setPullStatus(pullState);
+				pMaster.setUserId(userId);
+				pMaster.setUpdatedTime(updTime);
+				pMaster.setCommitCount(commitCount);
+				pMaster.setMerged(merged);
+				pMaster.setClosedAt(closedAt);
+
+				pMasterRepository.save(pMaster);
+
+				logger.info("Records saved in PullMaster table in DB --  through scheduler");
+			}
+		}
+
 	}
 }

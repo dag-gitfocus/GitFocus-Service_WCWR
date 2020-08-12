@@ -20,12 +20,12 @@ public interface GitFocusSchedulerRepository extends JpaRepository<GitServiceSch
 	 * 
 	 * @return commitDate
 	 */
-	@Query(value = "SELECT status FROM wcwr_dev.gitservice_scheduler_status where repository_name=:repoName and branch_name=:branchName", nativeQuery = true)
+	@Query(value = "SELECT status FROM wcwr_dev.gitservice_scheduler_status where repository_name=:repoName and branch_name=:branchName "
+			+ "order by repository_name, branch_name DESC LIMIT 1", nativeQuery = true)
 	String getSeriveStatus(String repoName, String branchName);
 
-	@Query(value = "SELECT service_exec_time FROM wcwr_dev.gitservice_scheduler_status where repository_name=:repoName and branch_name=:branchName", nativeQuery = true)
+	@Query(value = "SELECT service_exec_time FROM wcwr_dev.gitservice_scheduler_status where repository_name=:repoName and branch_name=:branchName "
+			+ "order by repository_name, branch_name DESC LIMIT 1", nativeQuery = true)
 	Timestamp getLastExecTime(String repoName, String branchName);
-
-
 } 
 

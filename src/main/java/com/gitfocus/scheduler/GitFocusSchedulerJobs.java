@@ -29,8 +29,6 @@ public class GitFocusSchedulerJobs {
 		logger.info("GitFocus ScheduledTasks init...");
 	}
 
-	boolean schedulerResult = false;
-
 	@Autowired
 	ICommitDetailGitService commitDetailsGitService;
 	@Autowired
@@ -54,5 +52,4 @@ public class GitFocusSchedulerJobs {
 		pullCommitGitService.pullCommitSchedulerJob();
 		reviewDetailsGitService.reviewDetailsSchedulerJob();
 	}
-
 }
