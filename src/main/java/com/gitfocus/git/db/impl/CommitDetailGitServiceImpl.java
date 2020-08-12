@@ -220,7 +220,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 				branches = bDetailsRepository.getBranchList(repoId);
 
 				branches.forEach(branchName -> {
-					commitDetailsSchedulerJobToSaveRecordsInDB(repoName, branchName);
+					commitDetailsSchedulerJobToSaveRecordsInDB(repoName, branchName,unitId);
 
 				});
 			});
@@ -234,14 +234,19 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 	 * @param repoName
 	 * @param branchName
 	 */
-	private void commitDetailsSchedulerJobToSaveRecordsInDB(String repoName, String branchName) {
+	private void commitDetailsSchedulerJobToSaveRecordsInDB(String repoName, String branchName, int unitId) {
 		// TODO Auto-generated method stub
 		logger.info("commitDetailsSchedulerJobToSaveRecordsInDB()" + repoName + branchName);
+		String userId = null;
 		String serviceName = "CommitDetail Service";
 		String status;
+		String shaId;
+		int repoId;
+		Date cDate;
+		String messgae;
 
 		//get the last scheduler status for each repository and branch whether its success or failure
-		status = gitFocusSchedulerRepo.getSeriveStatus(repoName, branchName);
+		status = gitFocusSchedulerRepo.getSeriveStatus(repoName, branchName, serviceName);
 		repoId = uReposRepository.findRepoId(repoName);
 
 		// getting records first time from table might be null in status column
@@ -253,7 +258,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 		// if service status failure then fetch last scheduler exec time for failed repository and branch
 		else if (status.equalsIgnoreCase("failure")) {
 			// get the last commit details scheduler status for failed repository and branch
-			startDate = gitFocusSchedulerRepo.getLastExecTime(repoName, branchName);
+			startDate = gitFocusSchedulerRepo.getLastExecTime(repoName, branchName, serviceName);
 			endDate = LocalDateTime.now();
 		}
 		// hit the git and get json response based on success or failure for commit details
@@ -316,7 +321,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 
 							cDetailsRepository.save(cDetails);
 
-							logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() Scheduler completed Succesfully for " + repoName + branchName);
+							logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() Scheduler completed Succesfully for Repository" + repoName + " and Branch is " + branchName);
 						}
 					}
 				}

@@ -93,4 +93,14 @@ public interface PullMasterRepository extends JpaRepository<PullMaster, Object> 
 	@Query(value = "SELECT created_time FROM wcwr_dev.pull_master ORDER BY created_time DESC LIMIT 1", nativeQuery = true)
 	Timestamp getLastPRCreatedDate();
 
+	/**
+	 * 
+	 * @param repoId
+	 * @param branchName
+	 * @return
+	 */
+	@Query(value = "SELECT created_time FROM wcwr_dev.pull_master where repo_id=:repoId and from_branch=:branchName "
+			+ "order by created_time DESC LIMIT 1", nativeQuery = true)
+	Timestamp getLastSuccessfulPRCreatedTime(int repoId, String branchName);
+
 }

@@ -18,14 +18,24 @@ public interface GitFocusSchedulerRepository extends JpaRepository<GitServiceSch
 
 	/**
 	 * 
-	 * @return commitDate
+	 * @param repoName
+	 * @param branchName
+	 * @param serviceName
+	 * @return status
 	 */
-	@Query(value = "SELECT status FROM wcwr_dev.gitservice_scheduler_status where repository_name=:repoName and branch_name=:branchName "
-			+ "order by repository_name, branch_name DESC LIMIT 1", nativeQuery = true)
-	String getSeriveStatus(String repoName, String branchName);
+	@Query(value = "SELECT status FROM wcwr_dev.gitservice_scheduler_status where repository_name=:repoName and branch_name=:branchName\r\n" + 
+			"and service_name =:serviceName order by repository_name, branch_name DESC LIMIT 1", nativeQuery = true)
+	String getSeriveStatus(String repoName, String branchName, String serviceName);
 
-	@Query(value = "SELECT service_exec_time FROM wcwr_dev.gitservice_scheduler_status where repository_name=:repoName and branch_name=:branchName "
-			+ "order by repository_name, branch_name DESC LIMIT 1", nativeQuery = true)
-	Timestamp getLastExecTime(String repoName, String branchName);
+	/**
+	 * 
+	 * @param repoName
+	 * @param branchName
+	 * @param serviceName
+	 * @return service_exec_time
+	 */
+	@Query(value = "SELECT service_exec_time FROM wcwr_dev.gitservice_scheduler_status where repository_name=:repoName and branch_name=:branchName\\r\\n\" + \r\n" + 
+			"			\"and service_name =:serviceName order by repository_name, branch_name DESC LIMIT 1", nativeQuery = true)
+	Timestamp getLastExecTime(String repoName, String branchName, String serviceName);
 } 
 
