@@ -331,10 +331,10 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 				ex.printStackTrace();
 			}
 		}
-
+		// Scheduler events to save in DB table
 		if(!jsonResponse.isEmpty()) {
 			// has some commit details for particular time period and scheduler job status is success
-			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() scheduler status success");
+			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() scheduler status is success");
 			String serviceStatus = "success";
 			LocalDateTime localDateTime = LocalDateTime.now();
 			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());

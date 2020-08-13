@@ -16,7 +16,7 @@ import com.gitfocus.git.db.service.ICommitDetailGitService;
 /**
  * 
  * @author Tech Mahindra
- * Scheduler class for Commit/PullRequest/PR Review for Git Services 
+ * Scheduler class for Brancgh Details/ Commit Details/ Pull Commit/ PullRequest/ PR Review for Git Services 
  */
 
 @Component
@@ -38,10 +38,10 @@ public class GitFocusSchedulerJobs {
 	@Autowired
 	ReviewDetailsGitServiceImpl reviewDetailsGitService;
 
-	// Run scheduler after application start-up
+	// Run scheduler on application start-up
 	@PostConstruct
 	public synchronized void onStartup() throws Exception {
-//		commitDetailsGitService.commitDetailsSchedulerJob();
+		commitDetailsGitService.commitDetailsSchedulerJob();
 		pullMasterGitService.pullMasterSchedulerJob();
 	}
 
