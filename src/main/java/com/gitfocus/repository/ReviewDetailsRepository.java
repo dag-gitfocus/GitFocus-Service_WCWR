@@ -59,4 +59,20 @@ public interface ReviewDetailsRepository extends JpaRepository<ReviewDetails, Ob
 	@Query(value = "SELECT reviewed_at FROM wcwr_dev.review_details ORDER BY reviewed_at DESC LIMIT 1", nativeQuery = true)
 	Timestamp getLastReviewDate();
 
+	/**
+	 * 
+	 * @param repoId
+	 * @return pull_number
+	 */
+	@Query(value = "select pull_number from wcwr_dev.pull_commit where repo_id=:repoId order by pull_number DESC LIMIT 1", nativeQuery = true)
+	int getlastSuccessfulPullNumber(int repoId);
+
+	/**
+	 * 
+	 * @param repoId
+	 * @return pull_number
+	 */
+	@Query(value = "select pull_number from wcwr_dev.pull_commit where repo_id=:repoId order by pull_number DESC LIMIT 1", nativeQuery = true)
+	int getlastFailurePullNumber(int repoId);
+
 }

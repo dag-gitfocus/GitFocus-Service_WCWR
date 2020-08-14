@@ -103,4 +103,20 @@ public interface PullMasterRepository extends JpaRepository<PullMaster, Object> 
 			+ "order by created_time DESC LIMIT 1", nativeQuery = true)
 	Timestamp getLastSuccessfulPRCreatedTime(int repoId, String branchName);
 
+	/**
+	 * 
+	 * @param lastPullNumber
+	 * @return pull_number
+	 */
+	@Query(value = "SELECT pull_number FROM wcwr_dev.pull_master WHERE pull_number >:pullNumber order by pull_number", nativeQuery = true)
+	List<String> findPullNoAfterLastSucceessfulRun(int pullNumber);
+	
+	/**
+	 * 
+	 * @param lastPullNumber
+	 * @return pull_number
+	 */
+	@Query(value = "SELECT pull_number FROM wcwr_dev.pull_master WHERE pull_number >:pullNumber order by pull_number", nativeQuery = true)
+	List<String> findPullNoFromLastFailureRun(int pullNumber);
+
 }

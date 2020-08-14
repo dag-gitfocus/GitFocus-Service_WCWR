@@ -88,7 +88,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 	JSONObject jsonShaObj = null;
 	Date cDate = null;
 	String commitDate = null;
-	String messgae = null;
+	String message = null;
 	List<String> reposName = null;
 	List<String> branches = null;
 	String errorMessage = null;
@@ -143,7 +143,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 							shaId = commitDetailObj.getString("sha");
 							commitDate = commitObj2.getString("date");
 							cDate = GitFocusUtil.stringToDate(commitDate);
-							messgae = commitObj1.getString("message");
+							message = commitObj1.getString("message");
 
 							// commit_detail based on sha_id -- START
 							if (shaId != null) {
@@ -178,7 +178,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 
 									cDetails.setCommitDate(cDate);
 									cDetails.setUserId(userId);
-									cDetails.setMessage(messgae);
+									cDetails.setMessage(message);
 									cDetails.setFileName(fileName.replace("null", ""));
 									cDetails.setFileStatus(fileStatus.replace("null", ""));
 									cDetails.setLinesAdded(linesAdded.replace("null", ""));
@@ -237,13 +237,8 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 	private void commitDetailsSchedulerJobToSaveRecordsInDB(String repoName, String branchName, int unitId) {
 		// TODO Auto-generated method stub
 		logger.info("commitDetailsSchedulerJobToSaveRecordsInDB()" + repoName + branchName);
-		String userId = null;
-		String serviceName = "CommitDetail Service";
+		String serviceName = "CommitDetail";
 		String status;
-		String shaId;
-		int repoId;
-		Date cDate;
-		String messgae;
 
 		//get the last scheduler status for each repository and branch whether its success or failure
 		status = gitFocusSchedulerRepo.getSeriveStatus(repoName, branchName, serviceName);
@@ -262,10 +257,10 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 			endDate = LocalDateTime.now();
 		}
 		// hit the git and get json response based on success or failure for commit details
-		for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
+		for (int page = 1; page <= gitConstant.SCHEDULER_MAX_PAGE; page++) {
 			try {
 				commitDetailURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits?" + "sha="
-						+ branchName + "&"+ "since="+ startDate + "&"+ "until=" + endDate + "&page=" + page + "&" + "per_page=" + gitConstant.TOTAL_RECORDS_PER_PAGE + "&";
+						+ branchName + "&"+ "since="+ startDate + "&"+ "until=" + endDate + "&page=" + page + "&" + "per_page=" + gitConstant.SCHEDULER_TOTAL_RECORDS_PER_PAGE + "&";
 
 				commitsResult = gitUtil.getGitAPIJsonResponse(commitDetailURI);
 				jsonResponse = new JSONArray(commitsResult);
@@ -283,7 +278,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 					shaId = commitDetailObj.getString("sha");
 					commitDate = commitObj2.getString("date");
 					cDate = GitFocusUtil.stringToDate(commitDate);
-					messgae = commitObj1.getString("message");
+					message = commitObj1.getString("message");
 
 					if (shaId != null) {
 						commitDetailShaURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits/" + shaId + "?";
@@ -313,7 +308,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 
 							cDetails.setCommitDate(cDate);
 							cDetails.setUserId(userId);
-							cDetails.setMessage(messgae);
+							cDetails.setMessage(message);
 							cDetails.setFileName(fileName.replace("null", ""));
 							cDetails.setFileStatus(fileStatus.replace("null", ""));
 							cDetails.setLinesAdded(linesAdded.replace("null", ""));

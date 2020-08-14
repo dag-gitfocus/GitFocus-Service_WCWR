@@ -267,7 +267,7 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 	private void pullMasterSchedulerJobToSaveRecordsInDB(String repoName, String branchName) {
 		// TODO Auto-generated method stub
 		logger.info("pullMasterSchedulerJobToSaveRecordsInDB()" + repoName + branchName);
-		String serviceName = "PullMaster Service";
+		String serviceName = "PullMaster";
 		String status;
 
 		//get the last scheduler status for each repository and branch whether its success or failure
@@ -287,11 +287,11 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 			endDate = LocalDateTime.now();
 		}
 
-		for (int page = 1; page <= gitConstant.MAX_PAGE; page++) {
+		for (int page = 1; page <= gitConstant.SCHEDULER_MAX_PAGE; page++) {
 			// To get Pull review based on all the pull history
 			try {
 				pullMasterURI = gitFocusConstant.BASE_URI + unitOwner + "/" + repoName + "/pulls?" + "state=all"
-						+ "&" + "since="+ startDate + "&"+ "until=" + endDate + "page=" + page + "&per_page=" + gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
+						+ "&" + "since="+ startDate + "&"+ "until=" + endDate + "page=" + page + "&per_page=" + gitFocusConstant.SCHEDULER_TOTAL_RECORDS_PER_PAGE + "&";
 
 				pullsResult = gitUtil.getGitAPIJsonResponse(pullMasterURI);
 				jsonResponse = new JSONArray(pullsResult);

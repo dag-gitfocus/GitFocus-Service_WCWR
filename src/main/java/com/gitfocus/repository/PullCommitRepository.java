@@ -34,4 +34,20 @@ public interface PullCommitRepository extends JpaRepository<PullCommit, Object> 
 			"			) x where row_number = ?4", nativeQuery = true)
 	List<Object[]> getCommitDetailsBasedOnPR(int pullNo, String branchName, int repoId, int rownum);
 
+	/**
+	 * 
+	 * @param repoId
+	 * @return pull_number
+	 */
+	@Query(value = "select pull_number from wcwr_dev.pull_commit where repo_id=:repoId order by pull_number DESC LIMIT 1", nativeQuery = true)
+	int getlastSuccessfulPullNumber(int repoId);
+
+	/**
+	 * 
+	 * @param repoId
+	 * @return pull_number
+	 */
+	@Query(value = "select pull_number from wcwr_dev.pull_commit where repo_id=:repoId order by pull_number DESC LIMIT 1", nativeQuery = true)
+	int getlastFailurePullNumber(int repoId);
+
 }
