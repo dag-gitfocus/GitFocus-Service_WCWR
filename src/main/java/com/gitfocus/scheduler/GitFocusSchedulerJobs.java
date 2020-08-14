@@ -41,10 +41,10 @@ public class GitFocusSchedulerJobs {
 	// Run scheduler on application start-up
 	@PostConstruct
 	public synchronized void onStartup() throws Exception {
-//		commitDetailsGitService.commitDetailsSchedulerJob();
-//		pullMasterGitService.pullMasterSchedulerJob();
-//		pullCommitGitService.pullCommitSchedulerJob();
-		reviewDetailsGitService.reviewDetailsSchedulerJob();
+		//		commitDetailsGitService.commitDetailsSchedulerJob();
+		//		pullMasterGitService.pullMasterSchedulerJob();
+		//		pullCommitGitService.pullCommitSchedulerJob();
+		//		reviewDetailsGitService.reviewDetailsSchedulerJob();
 	}
 
 	/* ==========================================================================
