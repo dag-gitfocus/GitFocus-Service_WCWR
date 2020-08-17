@@ -15,12 +15,19 @@ import com.gitfocus.git.db.model.BranchDetails;
 @Repository
 public interface BranchDetailsRepository extends JpaRepository<BranchDetails, Object> {
 
-    /**
-     * 
-     * @param repoId
-     * @return branchList
-     */
-    @Query("select b.bCompositeId.branchName from BranchDetails b where b.bCompositeId.repoId=:repoId and b.bCompositeId.branchName!= 'staging' and b.bCompositeId.branchName!= 'master'")
-    List<String> getBranchList(int repoId);
+	/**
+	 * 
+	 * @param repoId
+	 * @return branchList
+	 */
+	@Query("select b.bCompositeId.branchName from BranchDetails b where b.bCompositeId.repoId=:repoId and b.bCompositeId.branchName!= 'staging' and b.bCompositeId.branchName!= 'master'")
+	List<String> getBranchList(int repoId);
+
+	/**
+	 * 
+	 * @return getAllExistingBranches
+	 */
+	@Query(value = "select branch_name from wcwr_dev.branch_details", nativeQuery = true)
+	List<String> getAllExistingBranches();
 
 }

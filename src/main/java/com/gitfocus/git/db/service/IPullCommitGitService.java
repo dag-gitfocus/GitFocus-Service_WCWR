@@ -20,6 +20,6 @@ public interface IPullCommitGitService {
 	 * @param now
 	 * @return
 	 */
-	boolean pullCommitSchedulerJob();
+	public void pullCommitSchedulerJob();
 
 }

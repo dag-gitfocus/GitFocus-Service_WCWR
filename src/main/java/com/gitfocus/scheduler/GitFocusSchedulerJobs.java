@@ -8,10 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.gitfocus.git.db.impl.PullCommitGitServiceImpl;
-import com.gitfocus.git.db.impl.PullMasterGitServiceImpl;
-import com.gitfocus.git.db.impl.ReviewDetailsGitServiceImpl;
+import com.gitfocus.git.db.service.IBranchDetailGitService;
 import com.gitfocus.git.db.service.ICommitDetailGitService;
+import com.gitfocus.git.db.service.IPullCommitGitService;
+import com.gitfocus.git.db.service.IPullMasterGitService;
+import com.gitfocus.git.db.service.IReviewDetailsGitService;
 
 /**
  * 
@@ -30,21 +31,24 @@ public class GitFocusSchedulerJobs {
 	}
 
 	@Autowired
+	IBranchDetailGitService branchDetailService;
+	@Autowired
 	ICommitDetailGitService commitDetailsGitService;
 	@Autowired
-	PullCommitGitServiceImpl pullCommitGitService;
+	IPullCommitGitService pullCommitGitService;
 	@Autowired
-	PullMasterGitServiceImpl pullMasterGitService;
+	IPullMasterGitService pullMasterGitService;
 	@Autowired
-	ReviewDetailsGitServiceImpl reviewDetailsGitService;
+	IReviewDetailsGitService reviewDetailsGitService;
 
 	// Run scheduler on application start-up
 	@PostConstruct
 	public synchronized void onStartup() throws Exception {
-		//		commitDetailsGitService.commitDetailsSchedulerJob();
-		//		pullMasterGitService.pullMasterSchedulerJob();
-		//		pullCommitGitService.pullCommitSchedulerJob();
-		//		reviewDetailsGitService.reviewDetailsSchedulerJob();
+//		branchDetailService.branchDetailsSchedulerJob();
+//		commitDetailsGitService.commitDetailsSchedulerJob();
+//		pullMasterGitService.pullMasterSchedulerJob();
+//		pullCommitGitService.pullCommitSchedulerJob();
+		reviewDetailsGitService.reviewDetailsSchedulerJob();
 	}
 
 	/* ==========================================================================

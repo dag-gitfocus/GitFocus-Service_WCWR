@@ -103,7 +103,9 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 	List<String> branches = null;
 	Timestamp startDate = null;
 	LocalDateTime endDate = null;
-	String errorMessage = null;
+	String errorMessage= null;
+	LocalDateTime localDateTime = LocalDateTime.now();
+	Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	PullMasterCompositeId pullCompositeId = new PullMasterCompositeId();
 	PullMaster pMaster = new PullMaster();
 
@@ -232,13 +234,9 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 	 * Get the repository and branch
 	 */
 	@Override
-	public boolean pullMasterSchedulerJob() {
+	public void pullMasterSchedulerJob() {
 		// TODO Auto-generated method stub
-
 		List<Units> units = (List<Units>) unitsRepository.findAll();
-		if (units.isEmpty()) {
-			return result;
-		}
 		units.forEach(response -> {
 			unitId = response.getUnitId();
 			unitOwner = response.getUnitOwner();
@@ -255,7 +253,6 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 				});
 			});
 		});
-		return true;
 	}
 
 	/**
@@ -270,26 +267,24 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 		String serviceName = "PullMaster";
 		String status;
 
-		//get the last scheduler status for each repository and branch whether its success or failure
+		//get the last scheduler status for each repository whether its success or failure
 		status = gitFocusSchedulerRepo.getSeriveStatus(repoName, branchName, serviceName);
 		repoId = uReposRepository.findRepoId(repoName);
 
-		// getting records first time from table might be null in status column
-		// if service status success then fetch last PR created_time for each repository and branch 
+		// getting records first time from table gitservice_scheduler_status might be null in status column
+		// if service status success then fetch last pull_number for each repository 
 		if(status == null || status.equalsIgnoreCase("success")) {
 			startDate = pMasterRepository.getLastSuccessfulPRCreatedTime(repoId, branchName);
 			endDate = LocalDateTime.now();
 		}
-		// if service status failure then fetch last scheduler exec time for failed repository and branch
+		// if service status failure then fetch last pull_number for failed repository
 		else if (status.equalsIgnoreCase("failure")) {
-			// get the last PR details scheduler status for failed repository and branch
 			startDate = gitFocusSchedulerRepo.getLastExecTime(repoName, branchName, serviceName);
 			endDate = LocalDateTime.now();
 		}
-
-		for (int page = 1; page <= gitConstant.SCHEDULER_MAX_PAGE; page++) {
-			// To get Pull review based on all the pull history
-			try {
+		try {
+			for (int page = 1; page <= gitConstant.SCHEDULER_MAX_PAGE; page++) {
+				// To get Pull review based on all the pull history
 				pullMasterURI = gitFocusConstant.BASE_URI + unitOwner + "/" + repoName + "/pulls?" + "state=all"
 						+ "&" + "since="+ startDate + "&"+ "until=" + endDate + "page=" + page + "&per_page=" + gitFocusConstant.SCHEDULER_TOTAL_RECORDS_PER_PAGE + "&";
 
@@ -323,7 +318,7 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 
 					pullNoUri = gitFocusConstant.BASE_URI + unitOwner + "/" + repoName + "/pulls/" + pullNo
 							+ "?" + "state=all" + "&" + "page=" + page + "&per_page="
-							+ gitFocusConstant.TOTAL_RECORDS_PER_PAGE + "&";
+							+ gitFocusConstant.SCHEDULER_TOTAL_RECORDS_PER_PAGE + "&";
 
 					pullNoResults = gitUtil.getGitAPIJsonResponse(pullNoUri);
 					pullNoObjJson = new JSONObject(pullNoResults);
@@ -372,42 +367,39 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 
 					pMasterRepository.save(pMaster);
 
-					logger.info("pullMasterSchedulerJobToSaveRecordsInDB() Scheduler completed Succesfully for Repository" + repoName + " and Branch is " + branchName);
 				}
-			} catch (Exception ex) {
-				// TODO: handle exception
-				errorMessage= ex.getMessage();
-				ex.printStackTrace();
-			}
+			} 
+		} catch (Exception ex) {
+			// TODO: handle exception
+			errorMessage= ex.getMessage();
+			ex.printStackTrace();
 		}
-		if(!jsonResponse.isEmpty()) {
+		// Scheduler events to save in DB table
+		if(!jsonResponse.isEmpty() && errorMessage == null) {
 			// has some PR details for particular time period and scheduler job status is success
 			logger.info("pullMasterSchedulerJobToSaveRecordsInDB() scheduler status success");
 			String serviceStatus = "success";
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-			String errorMsg = "";
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			String errorMessage = "";
 			// capture and save scheduler status in gitservice_scheduler_status table in DB for successful scheduler job
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMsg, serviceExecTime);
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
 
 		} if (jsonResponse.isEmpty()) {
 			// sometimes may not have PR details records for particular time period
 			// consider this scenario is success but there is no records
 			logger.info("pullMasterSchedulerJobToSaveRecordsInDB() may not have PR details records for particular time period "+startDate+" + and + "+endDate+"");
 			String serviceStatus = "success";
-			String errorMsg = "Sceduler completed Job but there is no PR details records between "+startDate+" + and + "+endDate+"";
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			String errorMessage = "Sceduler completed Job but there is no PR details records between "+startDate+" + and + "+endDate+"";
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			// capture and save scheduler status in gitservice_scheduler_status table for there is no PR 
 			// record for particular time period
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMsg, serviceExecTime);
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
 
 		} if (errorMessage != null) {
 			// has some exception while running scheduler 
 			logger.info("pullMasterSchedulerJobToSaveRecordsInDB() scheduler status failure");
 			String serviceStatus = "failure";
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone( ZoneId.systemDefault()).toInstant());
+			serviceExecTime = Date.from(localDateTime.atZone( ZoneId.systemDefault()).toInstant());
 			// log exception details in gitservice_scheduler_status table in DB
 			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
 		}

@@ -20,6 +20,7 @@ import com.gitfocus.git.db.model.PullCommit;
 import com.gitfocus.git.db.model.PullCommitCompositeId;
 import com.gitfocus.git.db.model.Units;
 import com.gitfocus.git.db.service.IPullCommitGitService;
+import com.gitfocus.repository.BranchDetailsRepository;
 import com.gitfocus.repository.CommitDetailsRepository;
 import com.gitfocus.repository.GitFocusSchedulerRepository;
 import com.gitfocus.repository.PullCommitRepository;
@@ -61,6 +62,8 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 	private PullMasterRepository pullMasterRepo;
 	@Autowired 
 	GitFocusSchedulerRepository gitFocusSchedulerRepo;
+	@Autowired
+	private BranchDetailsRepository branchRepo;
 
 	int repoId = 0;
 	int unitId = 0;
@@ -77,6 +80,8 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 	List<Units> units = null;
 	int pullNum = 0;
 	String errorMessage = null;
+	LocalDateTime localDateTime = LocalDateTime.now();
+	Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	PullCommit pCommit = new PullCommit();
 	PullCommitCompositeId pullCompositeId = new PullCommitCompositeId();
 
@@ -154,28 +159,26 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 	 * Method to execute scheduler jobs for pull commit details
 	 */
 	@Override
-	public boolean pullCommitSchedulerJob() {
+	public void pullCommitSchedulerJob() {
 		// TODO Auto-generated method stub
 
-		// TODO Auto-generated method stub
-		boolean result = false;
-		units = uReposRepository.findAll();
-		if (units.isEmpty()) {
-			return result;
-		} else if (!units.isEmpty()) {
+		List<Units> units = (List<Units>) uReposRepository.findAll();
+		units.forEach(response -> {
+			unitId = response.getUnitId();
+			unitOwner = response.getUnitOwner();
+			reposName = uRepository.findReposName(unitId);
 
-			units.forEach(response -> {
-				unitId = response.getUnitId();
-				unitOwner = response.getUnitOwner();
-				reposName = uRepository.findReposName(unitId);
+			reposName.forEach(repoName -> {
+				repoId = uRepository.findRepoId(repoName);
 
-				reposName.forEach(repoName -> {
-					repoId = uRepository.findRepoId(repoName);
-					pullCommitSchedulerJobToSaveRecordsInDB(repoName, unitId, repoId);
+				// get branches for repository
+				branches = branchRepo.getBranchList(repoId);
+
+				branches.forEach(branchName -> {
+					pullCommitSchedulerJobToSaveRecordsInDB(repoName, branchName, unitId, repoId);
 				});
 			});
-		}
-		return true;
+		});
 	}
 
 	/**
@@ -184,7 +187,7 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 	 * @param unitId
 	 * @param repoId
 	 */
-	private void pullCommitSchedulerJobToSaveRecordsInDB(String repoName, int unitId, int repoId) {
+	private void pullCommitSchedulerJobToSaveRecordsInDB(String repoName, String branchName, int unitId, int repoId) {
 		// TODO Auto-generated method stub
 		logger.info("pullCommitSchedulerJobToSaveRecordsInDB()" + repoName + repoId);
 		String serviceName = "PullCommit";
@@ -194,7 +197,7 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 		//get the last scheduler status for each repository and branch whether its success or failure
 		status = gitFocusSchedulerRepo.getSeriveStatusForPullCommit(repoName, serviceName);
 
-		// getting records first time from table might be null in status column
+		// getting records first time from table gitservice_scheduler_status might be null in status column
 		// if service status success then get last pull number 
 		if(status == null || status.equalsIgnoreCase("success")) {
 			pullNumber = pullCommitRepo.getlastSuccessfulPullNumber(repoId);
@@ -206,9 +209,9 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 			pullNumber = pullCommitRepo.getlastFailurePullNumber(repoId);
 			pullNos = pullMasterRepo.findPullNoFromLastFailureRun(pullNumber);
 		}
-		pullNos.forEach(pullNo -> {
-			for (int page = 1; page <= gitConstant.SCHEDULER_MAX_PAGE; page++) {
-				try {
+		try {
+			pullNos.forEach(pullNo -> {
+				for (int page = 1; page <= gitConstant.SCHEDULER_MAX_PAGE; page++) {
 					pullCommitURI = gitConstant.BASE_URI + unitOwner + "/" + repoName
 							+ "/pulls/"+pullNo+"/commits?"+"state=all"+"&" + "page=" + page  + "&per_page=" + gitConstant.SCHEDULER_TOTAL_RECORDS_PER_PAGE+ "&";
 
@@ -217,7 +220,6 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 					pullCommitResult = gitUtil.getGitAPIJsonResponse(pullCommitURI);
 					jsonResponse = new JSONArray(pullCommitResult);
 
-
 					jsonResponse = new JSONArray(pullCommitResult);
 					for (int i = 0; i < jsonResponse.length(); i++) {
 						jsonObj = jsonResponse.getJSONObject(i);
@@ -225,57 +227,51 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 						// get branches based on repoId and sha_id
 						// sometimes one branch has multiple repoId and sha_id
 						branches = commitRepo.getBranchNameByShaIdAndRepoId(repoId, sha_id);
-						branches.forEach(branchName -> {
+						branches.forEach(bName -> {
 							pullCompositeId.setRepoId(repoId);
 							pullCompositeId.setPullNumber(Integer.parseInt(pullNo));
 							pullCompositeId.setCommitId(sha_id);
-							pullCompositeId.setBranchName(branchName);
+							pullCompositeId.setBranchName(bName);
 
 							pCommit.setpCompositeId(pullCompositeId);
 							pCommit.setUnitId(unitId);
 
 							pullCommitRepo.save(pCommit);
-
-							logger.info("Records saved in pull_commit table in DB --  through scheduler");
 						});
 					}
 				}
-				catch (JSONException ex) {
-					// TODO: handle exception
-					errorMessage = ex.getMessage();
-					ex.printStackTrace();
-				}
-			}
-		});
+			});
+		}catch (JSONException ex) {
+			// TODO: handle exception
+			errorMessage = ex.getMessage();
+			ex.printStackTrace();
+		}
 		// Scheduler events to save in DB table
-		if(!jsonResponse.isEmpty()) {
+		if (pullNos != null && errorMessage == null && !pullNos.isEmpty()) {
 			// has some pull commit details and scheduler job status is success
 			logger.info("pullCommitSchedulerJobToSaveRecordsInDB() scheduler status is success");
 			String serviceStatus = "success";
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-			String errorMsg = "";
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			String errorMessage = "";
 			// capture and save scheduler status in gitservice_scheduler_status table in DB for successful scheduler job
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMsg, serviceExecTime);
-		} if (jsonResponse.isEmpty()) {
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
+		} if (pullNos == null || pullNos.isEmpty()) {
 			// sometimes may not have commit details records for particular time period
 			// consider this scenario is success but there is no records
 			logger.info("pullCommitSchedulerJobToSaveRecordsInDB() may not have pull commit details on " + LocalDate.now());
 			String serviceStatus = "success";
-			String errorMsg = "Sceduler completed Job but there is no PULL commit details records on" + LocalDate.now();
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			String errorMessage = "Sceduler completed Job but there is no PULL commit details records on" + LocalDate.now();
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			// capture and save scheduler status in gitservice_scheduler_status table for there is no commit details
 			// record for particular time period
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMsg, serviceExecTime);
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
 
 		}
 		if (errorMessage != null) {
 			// has some exception while running scheduler 
 			logger.info("pullCommitSchedulerJobToSaveRecordsInDB() scheduler status failure");
 			String serviceStatus = "failure";
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone( ZoneId.systemDefault()).toInstant());
+			serviceExecTime = Date.from(localDateTime.atZone( ZoneId.systemDefault()).toInstant());
 			// log exception details in gitservice_scheduler_status table in DB
 			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
 		}

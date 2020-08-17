@@ -91,10 +91,12 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 	String message = null;
 	List<String> reposName = null;
 	List<String> branches = null;
-	String errorMessage = null;
 	boolean schedulerResult = false;
+	String errorMessage = null;
 	Timestamp startDate = null;
 	LocalDateTime endDate = null;
+	LocalDateTime localDateTime = LocalDateTime.now();
+	Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	CommitDetails cDetails = new CommitDetails();
 	CommitDetailsCompositeId commitCompositeId = new CommitDetailsCompositeId();
 
@@ -238,27 +240,26 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 		// TODO Auto-generated method stub
 		logger.info("commitDetailsSchedulerJobToSaveRecordsInDB()" + repoName + branchName);
 		String serviceName = "CommitDetail";
-		String status;
-
+		String serviceStatus =null;
 		//get the last scheduler status for each repository and branch whether its success or failure
-		status = gitFocusSchedulerRepo.getSeriveStatus(repoName, branchName, serviceName);
+		serviceStatus = gitFocusSchedulerRepo.getSeriveStatus(repoName, branchName, serviceName);
 		repoId = uReposRepository.findRepoId(repoName);
 
-		// getting records first time from table might be null in status column
+		// getting records first time from table gitservice_scheduler_status might be null in status column
 		// if service status success then fetch last commit date for each repository and branch 
-		if(status == null || status.equalsIgnoreCase("success")) {
+		if(serviceStatus == null || serviceStatus.equalsIgnoreCase("success")) {
 			startDate = commitRepository.getLastSuccessfulCommitDate(repoId, branchName);
 			endDate = LocalDateTime.now();
 		}
 		// if service status failure then fetch last scheduler exec time for failed repository and branch
-		else if (status.equalsIgnoreCase("failure")) {
+		else if (serviceStatus.equalsIgnoreCase("failure")) {
 			// get the last commit details scheduler status for failed repository and branch
 			startDate = gitFocusSchedulerRepo.getLastExecTime(repoName, branchName, serviceName);
 			endDate = LocalDateTime.now();
 		}
 		// hit the git and get json response based on success or failure for commit details
-		for (int page = 1; page <= gitConstant.SCHEDULER_MAX_PAGE; page++) {
-			try {
+		try {
+			for (int page = 1; page <= gitConstant.SCHEDULER_MAX_PAGE; page++) {
 				commitDetailURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits?" + "sha="
 						+ branchName + "&"+ "since="+ startDate + "&"+ "until=" + endDate + "&page=" + page + "&" + "per_page=" + gitConstant.SCHEDULER_TOTAL_RECORDS_PER_PAGE + "&";
 
@@ -315,48 +316,43 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 							cDetails.setLinesRemoved(linesRemoved.replace("null", ""));
 
 							cDetailsRepository.save(cDetails);
-
-							logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() Scheduler completed Succesfully for Repository" + repoName + " and Branch is " + branchName);
 						}
 					}
 				}
-			} catch (Exception ex) {
-				// TODO: handle exception
-				errorMessage= ex.getMessage();
-				ex.printStackTrace();
-			}
+			} 
+		} catch (Exception ex) {
+			// TODO: handle exception
+			errorMessage= ex.getMessage();
+			ex.printStackTrace();
 		}
 		// Scheduler events to save in DB table
-		if(!jsonResponse.isEmpty()) {
+		if(!jsonResponse.isEmpty() && errorMessage.isEmpty()) {
 			// has some commit details for particular time period and scheduler job status is success
 			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() scheduler status is success");
-			String serviceStatus = "success";
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-			String errorMsg = "";
+			String status = "success";
+			String errorMessage = "";
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			// capture and save scheduler status in gitservice_scheduler_status table in DB for successful scheduler job
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMsg, serviceExecTime);
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, status, errorMessage, serviceExecTime);
 
 		} if (jsonResponse.isEmpty()) {
 			// sometimes may not have commit details records for particular time period
 			// consider this scenario is success but there is no records
 			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() may not have commit details records for particular time period "+startDate+" + and + "+endDate+"");
-			String serviceStatus = "success";
-			String errorMsg = "Sceduler completed Job but there is no commit details records between "+startDate+" + and + "+endDate+"";
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			String status = "success";
+			String errorMessage = "Sceduler completed Job but there is no commit details records between "+startDate+" + and + "+endDate+"";
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			// capture and save scheduler status in gitservice_scheduler_status table for there is no commit details
 			// record for particular time period
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMsg, serviceExecTime);
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, status, errorMessage, serviceExecTime);
 
 		} if (errorMessage != null) {
 			// has some exception while running scheduler 
 			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() scheduler status failure");
-			String serviceStatus = "failure";
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone( ZoneId.systemDefault()).toInstant());
+			String status = "failure";
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			// log exception details in gitservice_scheduler_status table in DB
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, status, errorMessage, serviceExecTime);
 		}
 	}
 }

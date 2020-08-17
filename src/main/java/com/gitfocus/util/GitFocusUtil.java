@@ -214,7 +214,7 @@ public class GitFocusUtil {
 		gs.setBranchName(branchName);
 		gs.setServiceName(serviceName);
 		gs.setStatus(status);
-		gs.setErrorException(errorException);
+		gs.setErrorException(errorException.toString());
 		gs.setServiceExecTime(serviceExecTime);
 
 		gitSchedulerRepo.save(gs);

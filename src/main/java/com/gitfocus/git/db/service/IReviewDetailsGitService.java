@@ -21,6 +21,6 @@ public interface IReviewDetailsGitService {
 	 * @param now
 	 * @return
 	 */
-	boolean reviewDetailsSchedulerJob();
+	public void reviewDetailsSchedulerJob();
 
 }

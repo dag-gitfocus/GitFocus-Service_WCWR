@@ -22,5 +22,5 @@ public interface IPullMasterGitService {
      * @param endDate
      * @return
      */
-	boolean pullMasterSchedulerJob();
+	public void pullMasterSchedulerJob();
 }

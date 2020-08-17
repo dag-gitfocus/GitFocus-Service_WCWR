@@ -20,6 +20,7 @@ import com.gitfocus.git.db.model.ReviewDetails;
 import com.gitfocus.git.db.model.ReviewDetailsCompositeId;
 import com.gitfocus.git.db.model.Units;
 import com.gitfocus.git.db.service.IReviewDetailsGitService;
+import com.gitfocus.repository.BranchDetailsRepository;
 import com.gitfocus.repository.GitFocusSchedulerRepository;
 import com.gitfocus.repository.PullMasterRepository;
 import com.gitfocus.repository.ReviewDetailsRepository;
@@ -59,6 +60,8 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 	private PullMasterRepository pullMasterRepo;
 	@Autowired 
 	GitFocusSchedulerRepository gitFocusSchedulerRepo;
+	@Autowired
+	private BranchDetailsRepository branchRepo;
 
 	int reviewId = 0;
 	String reviewResults = null;
@@ -81,6 +84,9 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 	List<String> reposName = null;
 	List<String> branches = null;
 	String errorMessage = null;
+	LocalDateTime localDateTime = LocalDateTime.now();
+	String serviceStatus = null;
+	Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	ReviewDetails rDetails = new ReviewDetails();
 	ReviewDetailsCompositeId rDetailsCompositeId = new ReviewDetailsCompositeId();
 
@@ -153,13 +159,9 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 	 * Method to execute scheduler jobs for PR Review details
 	 */
 	@Override
-	public boolean reviewDetailsSchedulerJob() {
+	public void reviewDetailsSchedulerJob() {
 		// TODO Auto-generated method stub
-
 		List<Units> units = (List<Units>) unitsRepository.findAll();
-		if (units.isEmpty()) {
-			return result;
-		}
 		units.forEach(response -> {
 			unitId = response.getUnitId();
 			unitOwner = response.getUnitOwner();
@@ -167,17 +169,26 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 
 			reposName.forEach(repoName -> {
 				repoId = uReposRepository.findRepoId(repoName);
-				pullNos = pullMasterRepo.findPullNo(repoId);
 
-				pullNos.forEach(reviewPullNo -> {
-					reviewDetailsSchedulerJobToSaveRecordsInDB(repoName, unitId, repoId);
+				// get branches for repository
+				branches = branchRepo.getBranchList(repoId);
+
+				branches.forEach(branchName -> {
+					reviewDetailsSchedulerJobToSaveRecordsInDB(repoName, branchName, unitId, repoId);
 				});
 			});
 		});
-		return true;
 	}
 
-	private void reviewDetailsSchedulerJobToSaveRecordsInDB(String repoName, int unitId, int repoId) {
+	/**
+	 * Method to save the values in commit_details table in DB through scheduler
+	 * Capture scheduler events and log to gitservice_scheduler_status tables DB table
+	 * 
+	 * @param repoName
+	 * @param unitId
+	 * @param repoId
+	 */
+	private void reviewDetailsSchedulerJobToSaveRecordsInDB(String repoName, String branchName, int unitId, int repoId) {
 		// TODO Auto-generated method stub
 		logger.info("reviewDetailsSchedulerJobToSaveRecordsInDB()" + repoId + repoName);
 		String serviceName = "ReviewDetails";
@@ -187,7 +198,7 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 		//get the last scheduler status for each repository and branch whether its success or failure
 		status = gitFocusSchedulerRepo.getSeriveStatusForPullCommit(repoName, serviceName);
 
-		// getting records first time from table might be null in status column
+		// getting records first time from table gitservice_scheduler_status might be null in status column
 		// if service status success then get last pull number 
 		if(status == null || status.equalsIgnoreCase("success")) {
 			// get the last pull_number from review_details table
@@ -200,9 +211,10 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 			pullNumber = reviewRepo.getlastFailurePullNumber(repoId);
 			pullNos = pullMasterRepo.findPullNoFromLastFailureRun(pullNumber);
 		}
-		pullNos.forEach(reviewNo -> {
-			for (int page = 1; page <= gitFocusConstant.SCHEDULER_MAX_PAGE; page++) {
-				try {
+		try {
+			pullNos.forEach(reviewNo -> {
+				for (int page = 1; page <= gitFocusConstant.SCHEDULER_MAX_PAGE; page++) {
+
 					// To get review details based on all the pull history
 					reviewURI =  gitFocusConstant.BASE_URI + unitOwner + "/" + repoName
 							+ "/pulls/"+reviewNo+"/reviews?"+"state=all"+"&" + "page=" + page  + "&per_page=" + gitFocusConstant.SCHEDULER_TOTAL_RECORDS_PER_PAGE+ "&";
@@ -236,35 +248,32 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 						logger.info("Records saved in review_details table in DB --  through scheduler ");
 					}
 
-				} catch (JSONException e) {
-					// TODO: handle exception
-					e.printStackTrace();
 				}
-			}
-
-		});
+			});
+		} catch (JSONException e) {
+			// TODO: handle exception
+			errorMessage = e.getMessage();
+			e.printStackTrace();
+		}
 		// Scheduler events to save in DB table
-		if(!jsonResponse.isEmpty()) {
+		if (pullNos != null && errorMessage == null && !pullNos.isEmpty()) {
 			// has some PR details and scheduler job status is success
 			logger.info("reviewDetailsSchedulerJobToSaveRecordsInDB() scheduler status is success");
-			String serviceStatus = "success";
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-			String errorMsg = "";
+			serviceStatus = "success";
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			String errorMessage = "";
 			// capture and save scheduler status in gitservice_scheduler_status table in DB for successful scheduler job
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, null, serviceName, serviceStatus, errorMsg, serviceExecTime);
-		} if (jsonResponse.isEmpty()) {
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, null, serviceName, serviceStatus, errorMessage, serviceExecTime);
+		} if (pullNos == null || pullNos.isEmpty()) {
 			// sometimes may not have PR details records for particular time period
 			// consider this scenario is success but there is no records
 			logger.info("reviewDetailsSchedulerJobToSaveRecordsInDB() may not have pull commit details on " + LocalDate.now());
-			String serviceStatus = "success";
-			String errorMsg = "Sceduler completed Job but there is no PULL commit details records on" + LocalDate.now();
-			LocalDateTime localDateTime = LocalDateTime.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			serviceStatus = "success";
+			String errorMessage = "Sceduler completed Job but there is no PULL commit details records on" + LocalDate.now();
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			// capture and save scheduler status in gitservice_scheduler_status table for there is no commit details
 			// record for particular time period
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, null, serviceName, serviceStatus, errorMsg, serviceExecTime);
-
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, null, serviceName, serviceStatus, errorMessage, serviceExecTime);
 		}
 		if (errorMessage != null) {
 			// has some exception while running scheduler 
