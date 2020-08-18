@@ -46,7 +46,7 @@ public class GitFocusUtil {
 
 	public GitFocusUtil() {
 		super();
-		logger.info("GitFocusUtil init");
+		logger.debug("GitFocusUtil init");
 	}
 
 	@Autowired
@@ -67,7 +67,7 @@ public class GitFocusUtil {
 	 * @return jsonResponse
 	 */
 	public String getGitAPIJsonResponse(String jsonURL) {
-		logger.info("getGitAPIJsonResponse - Adding AccessToken with jsonURL");
+		logger.debug("getGitAPIJsonResponse - Adding AccessToken with jsonURL");
 		List<Units> units = uRepository.findAll();
 		units.forEach(response -> {
 			if (response.getUnitName().equalsIgnoreCase("TR")) {
@@ -92,7 +92,7 @@ public class GitFocusUtil {
 	 * @throws ParseException
 	 */
 	public static Date stringToDate(String date) {
-		logger.info("stringToDate - Date is  " + date);
+		logger.debug("stringToDate - Date is  " + date);
 		Timestamp timestamp = null;
 		Date parsedDate = null;
 		try {
@@ -114,7 +114,7 @@ public class GitFocusUtil {
 	 * @return Date[]
 	 */
 	public static Date[] getStartAndEndDate(String date) {
-		logger.info("getStartAndEndDate - Date is  " + date);
+		logger.debug("getStartAndEndDate - Date is  " + date);
 		Date startDate = null;
 		Date endDate = null;
 		String newDate = null;
@@ -143,7 +143,7 @@ public class GitFocusUtil {
 	 * @return dateString
 	 */
 	public static String convertDateToString(Date date) {
-		logger.info("convertStringToDate - Date is  " + date);
+		logger.debug("convertStringToDate - Date is  " + date);
 		String dateString = null;
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
 		try {
@@ -163,7 +163,7 @@ public class GitFocusUtil {
 	 * @return calculteDaysBetweenTwoDatesOrHours
 	 */
 	public static List<Entry<Long, String>> calculteDaysBetweenTwoDatesOrHours(String createdDate, String reviewedDate) {
-		logger.info("calculteDaysBetweenTwoDates - Date is  " + createdDate, reviewedDate);
+		logger.debug("calculteDaysBetweenTwoDates - Date is  " + createdDate, reviewedDate);
 
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.US);
 		long noOfDaysBetweenDatesOrHours = 0;
@@ -208,7 +208,7 @@ public class GitFocusUtil {
 	 */
 	public void schedulerJobEventsToSaveInDB(String repoName, String branchName, String serviceName, String status, String errorException, Date serviceExecTime) {
 		// TODO Auto-generated method stub
-		logger.info("schedulerJobEventsToSaveInDB()" + repoName + branchName + serviceName + status + errorException + serviceExecTime);
+		logger.debug("schedulerJobEventsToSaveInDB()" + repoName + branchName + serviceName + status + errorException + serviceExecTime);
 		GitServiceSchedulersStatus gs = new GitServiceSchedulersStatus();
 		gs.setRepositoryName(repoName);
 		gs.setBranchName(branchName);
@@ -219,6 +219,6 @@ public class GitFocusUtil {
 
 		gitSchedulerRepo.save(gs);
 		
-		logger.info("Records saved successfully in gitservice_scheduler_status DB Table for service() " + serviceName + " and the staus is " + status );
+		logger.debug("Records saved successfully in gitservice_scheduler_status DB Table for service() " + serviceName + " and the staus is " + status );
 	}
 }

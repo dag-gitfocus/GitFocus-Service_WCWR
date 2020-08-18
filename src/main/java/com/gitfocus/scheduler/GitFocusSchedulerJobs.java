@@ -44,10 +44,10 @@ public class GitFocusSchedulerJobs {
 	// Run scheduler on application start-up
 	@PostConstruct
 	public synchronized void onStartup() throws Exception {
-//		branchDetailService.branchDetailsSchedulerJob();
-//		commitDetailsGitService.commitDetailsSchedulerJob();
-//		pullMasterGitService.pullMasterSchedulerJob();
-//		pullCommitGitService.pullCommitSchedulerJob();
+		branchDetailService.branchDetailsSchedulerJob();
+		commitDetailsGitService.commitDetailsSchedulerJob();
+		pullMasterGitService.pullMasterSchedulerJob();
+		pullCommitGitService.pullCommitSchedulerJob();
 		reviewDetailsGitService.reviewDetailsSchedulerJob();
 	}
 
@@ -70,6 +70,7 @@ public class GitFocusSchedulerJobs {
 	// Run scheduler @ 12AM on every day
 	@Scheduled(cron = "0 0 0 * * *",zone = "Asia/Kolkata")
 	public synchronized void onSchedule() throws Exception {
+		branchDetailService.branchDetailsSchedulerJob();
 		commitDetailsGitService.commitDetailsSchedulerJob();
 		pullMasterGitService.pullMasterSchedulerJob();
 		pullCommitGitService.pullCommitSchedulerJob();
