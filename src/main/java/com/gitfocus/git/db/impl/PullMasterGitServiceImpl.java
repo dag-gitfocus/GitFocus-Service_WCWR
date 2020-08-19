@@ -105,7 +105,7 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 	LocalDateTime endDate = null;
 	String errorMessage= null;
 	LocalDateTime localDateTime = LocalDateTime.now();
-	Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+	Date serviceExecTime = null;
 	PullMasterCompositeId pullCompositeId = new PullMasterCompositeId();
 	PullMaster pMaster = new PullMaster();
 
@@ -375,7 +375,7 @@ public class PullMasterGitServiceImpl implements IPullMasterGitService {
 			ex.printStackTrace();
 		}
 		// Scheduler events to save in DB table
-		if(!jsonResponse.isEmpty() && errorMessage == null) {
+		if(!jsonResponse.isEmpty() && errorMessage.isEmpty() && errorMessage != null) {
 			// has some PR details for particular time period and scheduler job status is success
 			logger.info("pullMasterSchedulerJobToSaveRecordsInDB() scheduler status success");
 			String serviceStatus = "success";

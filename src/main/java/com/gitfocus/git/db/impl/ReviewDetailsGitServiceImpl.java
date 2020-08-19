@@ -79,14 +79,13 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 	String accessToken = null;
 	int repoId = 0;
 	JSONObject reviewObj = null;
-	List<String> pullNos = null;
+	List<String> pullNoList = null;
 	String unitOwner = null;
 	List<String> reposName = null;
 	List<String> branches = null;
 	String errorMessage = null;
 	LocalDateTime localDateTime = LocalDateTime.now();
-	String serviceStatus = null;
-	Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+	Date serviceExecTime = null;
 	ReviewDetails rDetails = new ReviewDetails();
 	ReviewDetailsCompositeId rDetailsCompositeId = new ReviewDetailsCompositeId();
 
@@ -105,9 +104,9 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 
 			reposName.forEach(repoName -> {
 				repoId = uReposRepository.findRepoId(repoName);
-				pullNos = pullMasterRepo.findPullNo(repoId);
+				pullNoList = pullMasterRepo.findPullNo(repoId);
 
-				pullNos.forEach(reviewNo -> {
+				pullNoList.forEach(reviewNo -> {
 					for (int page = 1; page <= gitFocusConstant.MAX_PAGE; page++) {
 
 						// To get review details based on all the pull history
@@ -203,16 +202,16 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 		if(status == null || status.equalsIgnoreCase("success")) {
 			// get the last pull_number from review_details table
 			pullNumber = reviewRepo.getlastSuccessfulPullNumber(repoId);
-			pullNos = pullMasterRepo.findPullNoAfterLastSucceessfulRun(pullNumber);
+			pullNoList = pullMasterRepo.findPullNoAfterLastSucceessfulRun(pullNumber);
 		}
 		// if service status failure then get last failure pull_number
 		else if (status.equalsIgnoreCase("failure")) {
 			// get the last failure pull_number
 			pullNumber = reviewRepo.getlastFailurePullNumber(repoId);
-			pullNos = pullMasterRepo.findPullNoFromLastFailureRun(pullNumber);
+			pullNoList = pullMasterRepo.findPullNoFromLastFailureRun(pullNumber);
 		}
 		try {
-			pullNos.forEach(reviewNo -> {
+			pullNoList.forEach(reviewNo -> {
 				for (int page = 1; page <= gitFocusConstant.SCHEDULER_MAX_PAGE; page++) {
 
 					// To get review details based on all the pull history
@@ -256,24 +255,24 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 			e.printStackTrace();
 		}
 		// Scheduler events to save in DB table
-		if (pullNos != null && errorMessage == null && !pullNos.isEmpty()) {
+		if (pullNoList != null && !pullNoList.isEmpty() && errorMessage == null) {
 			// has some PR details and scheduler job status is success
 			logger.info("reviewDetailsSchedulerJobToSaveRecordsInDB() scheduler status is success");
-			serviceStatus = "success";
+			String serviceStatus = "success";
 			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			String errorMessage = "";
 			// capture and save scheduler status in gitservice_scheduler_status table in DB for successful scheduler job
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, null, serviceName, serviceStatus, errorMessage, serviceExecTime);
-		} if (pullNos == null || pullNos.isEmpty()) {
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
+		} if (pullNoList == null || pullNoList.isEmpty()) {
 			// sometimes may not have PR details records for particular time period
 			// consider this scenario is success but there is no records
 			logger.info("reviewDetailsSchedulerJobToSaveRecordsInDB() may not have pull commit details on " + LocalDate.now());
-			serviceStatus = "success";
+			String serviceStatus = "success";
 			String errorMessage = "Sceduler completed Job but there is no PULL commit details records on" + LocalDate.now();
 			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			// capture and save scheduler status in gitservice_scheduler_status table for there is no commit details
 			// record for particular time period
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, null, serviceName, serviceStatus, errorMessage, serviceExecTime);
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
 		}
 		if (errorMessage != null) {
 			// has some exception while running scheduler 
@@ -282,7 +281,7 @@ public class ReviewDetailsGitServiceImpl implements IReviewDetailsGitService {
 			LocalDateTime localDateTime = LocalDateTime.now();
 			Date serviceExecTime = Date.from(localDateTime.atZone( ZoneId.systemDefault()).toInstant());
 			// log exception details in gitservice_scheduler_status table in DB
-			gitUtil.schedulerJobEventsToSaveInDB(repoName, null, serviceName, serviceStatus, errorMessage, serviceExecTime);
+			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
 		}
 	}
 }

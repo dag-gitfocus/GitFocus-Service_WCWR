@@ -64,6 +64,7 @@ public class BranchDetailGitServiceImpl implements IBranchDetailGitService {
 	int repoId = 0;
 	String errorMessage = null;
 	String serviceStatus = null;
+	Date serviceExecTime = null;
 	LocalDateTime localDateTime = LocalDateTime.now();
 	Date branchCreatedTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	BranchDetails branchDetails = new BranchDetails();
@@ -171,11 +172,10 @@ public class BranchDetailGitServiceImpl implements IBranchDetailGitService {
 						// has some branch details for particular time period and scheduler job status is success
 						logger.info("branchDetailsSchedulerJobToSaveRecordsInDB() scheduler status is success");
 						serviceStatus = "success";
-						branchCreatedTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+						serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 						String errorMessage = "";
 						// capture and save scheduler status in gitservice_scheduler_status table in DB for successful scheduler job
-						gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, branchCreatedTime);
-
+						gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
 					}
 				} 
 			}
@@ -190,7 +190,7 @@ public class BranchDetailGitServiceImpl implements IBranchDetailGitService {
 			logger.info("branchDetailsSchedulerJobToSaveRecordsInDB() may not have branch details records the date" + LocalDate.now());
 			String serviceStatus = "success";
 			String message = "Sceduler completed Job but there is no branch details records on " + LocalDate.now();
-			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			// capture and save scheduler status in gitservice_scheduler_status table for there is no branch details
 			// record for particular time period
 			gitUtil.schedulerJobEventsToSaveInDB(repoName, null, serviceName, serviceStatus, message, serviceExecTime);
@@ -200,7 +200,7 @@ public class BranchDetailGitServiceImpl implements IBranchDetailGitService {
 			logger.info("branchDetailsSchedulerJobToSaveRecordsInDB() scheduler status failure");
 			String serviceStatus = "failure";
 			branchCreatedTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-			Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 			// log exception details in gitservice_scheduler_status table in DB
 			gitUtil.schedulerJobEventsToSaveInDB(repoName, null, serviceName, serviceStatus, errorMessage, serviceExecTime);
 		}

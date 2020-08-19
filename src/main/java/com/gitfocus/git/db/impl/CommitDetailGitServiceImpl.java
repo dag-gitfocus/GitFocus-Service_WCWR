@@ -96,7 +96,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 	Timestamp startDate = null;
 	LocalDateTime endDate = null;
 	LocalDateTime localDateTime = LocalDateTime.now();
-	Date serviceExecTime = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+	Date serviceExecTime = null;
 	CommitDetails cDetails = new CommitDetails();
 	CommitDetailsCompositeId commitCompositeId = new CommitDetailsCompositeId();
 
@@ -222,7 +222,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 				branches = bDetailsRepository.getBranchList(repoId);
 
 				branches.forEach(branchName -> {
-					commitDetailsSchedulerJobToSaveRecordsInDB(repoName, branchName,unitId);
+					commitDetailsSchedulerJobToSaveRecordsInDB(repoName, branchName, unitId);
 
 				});
 			});
@@ -257,7 +257,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 			startDate = gitFocusSchedulerRepo.getLastExecTime(repoName, branchName, serviceName);
 			endDate = LocalDateTime.now();
 		}
-		// hit the git and get json response based on success or failure for commit details
+		// hit the git and get json response based on success or failure for commit details service
 		try {
 			for (int page = 1; page <= gitConstant.SCHEDULER_MAX_PAGE; page++) {
 				commitDetailURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/commits?" + "sha="
@@ -326,7 +326,7 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 			ex.printStackTrace();
 		}
 		// Scheduler events to save in DB table
-		if(!jsonResponse.isEmpty() && errorMessage.isEmpty()) {
+		if(!jsonResponse.isEmpty() && errorMessage.isEmpty() && errorMessage != null) {
 			// has some commit details for particular time period and scheduler job status is success
 			logger.info("commitDetailsSchedulerJobToSaveRecordsInDB() scheduler status is success");
 			String status = "success";
