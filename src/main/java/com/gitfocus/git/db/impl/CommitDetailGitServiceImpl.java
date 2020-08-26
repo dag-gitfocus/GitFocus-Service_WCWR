@@ -240,7 +240,8 @@ public class CommitDetailGitServiceImpl implements ICommitDetailGitService {
 		// TODO Auto-generated method stub
 		logger.info("commitDetailsSchedulerJobToSaveRecordsInDB()" + repoName + branchName);
 		String serviceName = "CommitDetail";
-		String serviceStatus =null;
+		String serviceStatus = null;
+		
 		//get the last scheduler status for each repository and branch whether its success or failure
 		serviceStatus = gitFocusSchedulerRepo.getSeriveStatus(repoName, branchName, serviceName);
 		repoId = uReposRepository.findRepoId(repoName);

@@ -145,7 +145,7 @@ public class BranchDetailGitServiceImpl implements IBranchDetailGitService {
 		// TODO Auto-generated method stub
 		logger.info("branchDetailsSchedulerJobToSaveRecordsInDB()" + repoName);
 		String serviceName = "BranchDetail";
-		List<String> existingBrancheList = new ArrayList<String>();
+		List<String> existingBranchList = new ArrayList<String>();
 		try {
 			for (int page = 1; page <= gitConstant.SCHEDULER_MAX_PAGE; page++) {
 				branchDetailURI = gitConstant.BASE_URI + unitOwner + "/" + repoName + "/branches?" + "page=" + page + "&per_page=" + gitConstant.SCHEDULER_TOTAL_RECORDS_PER_PAGE + "&";
@@ -155,10 +155,10 @@ public class BranchDetailGitServiceImpl implements IBranchDetailGitService {
 					branchObj = jsonResponse.getJSONObject(i);
 					branchName = branchObj.getString("name");
 					// get all existing branches from branch_details table
-					existingBrancheList = branchRepo.getAllExistingBranches();
+					existingBranchList = branchRepo.getAllExistingBranches();
 					// if new branch has created on particular day, update the 
 					// new branch name and created time in branch_details table through scheduler job
-					if(!existingBrancheList.stream().anyMatch(exBranchName -> exBranchName.equalsIgnoreCase(branchName))) {
+					if(!existingBranchList.stream().anyMatch(exBranchName -> exBranchName.equalsIgnoreCase(branchName))) {
 						// update new branch name in branch_details table with created date
 						repoId = uRepository.findRepoId(repoName);
 						bCompositeId.setUnitId(unitId);

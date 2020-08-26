@@ -256,7 +256,7 @@ public class PullCommitGitServiceImpl implements IPullCommitGitService {
 			// capture and save scheduler status in gitservice_scheduler_status table in DB for successful scheduler job
 			gitUtil.schedulerJobEventsToSaveInDB(repoName, branchName, serviceName, serviceStatus, errorMessage, serviceExecTime);
 		} if (pullNoList == null || pullNoList.isEmpty()) {
-			// sometimes may not have commit details records for particular time period
+			// sometimes may not have pull commit details records for particular time period
 			// consider this scenario is success but there is no records
 			logger.info("pullCommitSchedulerJobToSaveRecordsInDB() may not have pull commit details on " + LocalDate.now());
 			String serviceStatus = "success";
