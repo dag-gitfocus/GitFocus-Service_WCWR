@@ -17,7 +17,7 @@ import com.gitfocus.git.db.service.IReviewDetailsGitService;
 /**
  * 
  * @author Tech Mahindra
- * Scheduler class for Brancgh Details/ Commit Details/ Pull Commit/ PullRequest/ PR Review for Git Services 
+ * Swagger config file which is diplay basic info on Swagger UI
  */
 
 @Component
@@ -44,11 +44,11 @@ public class GitFocusSchedulerJobs {
 	// Run scheduler on application start-up
 	@PostConstruct
 	public synchronized void onStartup() throws Exception {
-		branchDetailService.branchDetailsSchedulerJob();
-		commitDetailsGitService.commitDetailsSchedulerJob();
-		pullMasterGitService.pullMasterSchedulerJob();
-		pullCommitGitService.pullCommitSchedulerJob();
-		reviewDetailsGitService.reviewDetailsSchedulerJob();
+//		branchDetailService.branchDetailsSchedulerJob();
+//		commitDetailsGitService.commitDetailsSchedulerJob();
+//		pullMasterGitService.pullMasterSchedulerJob();
+//		pullCommitGitService.pullCommitSchedulerJob();
+//		reviewDetailsGitService.reviewDetailsSchedulerJob();
 	}
 
 	/* ==========================================================================
@@ -70,10 +70,10 @@ public class GitFocusSchedulerJobs {
 	// Run scheduler @ 12AM on every day
 	@Scheduled(cron = "0 0 0 * * *",zone = "Asia/Kolkata")
 	public synchronized void onSchedule() throws Exception {
-		branchDetailService.branchDetailsSchedulerJob();
-		commitDetailsGitService.commitDetailsSchedulerJob();
-		pullMasterGitService.pullMasterSchedulerJob();
-		pullCommitGitService.pullCommitSchedulerJob();
-		reviewDetailsGitService.reviewDetailsSchedulerJob();
+//		branchDetailService.branchDetailsSchedulerJob();
+//		commitDetailsGitService.commitDetailsSchedulerJob();
+//		pullMasterGitService.pullMasterSchedulerJob();
+//		pullCommitGitService.pullCommitSchedulerJob();
+//		reviewDetailsGitService.reviewDetailsSchedulerJob();
 	}
 }
