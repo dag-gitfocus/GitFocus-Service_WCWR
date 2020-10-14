@@ -27,7 +27,7 @@ import com.gitfocus.util.GitFocusUtil;
 
 /**
  * @author Tech Mahindra
- * Service class for BranchDetails and store values in branch_details table in DB
+ * Service class for BranchDetails and store values in branch_details table in DB 
  * 
  * NOTE : By default GitAPIJson gives max 30 records only for each RestAPI call but for some API have more than 30 records, hence we
  * to have to append page number and totalNoOfRecords/perPage for each URL's to fetch rest of the records
